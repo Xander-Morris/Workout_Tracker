@@ -1,0 +1,13 @@
+fastapi
+uvicorn  # ASGI server to run the app
+sqlalchemy
+alembic
+psycopg2-binary  # For PostgreSQL
+pyjwt
+passlib[bcrypt]  # For password hashing
+pydantic[email]  # For user model validation
+python-dotenv
+pytest
+httpx
+pandas  # Optional for reports
+pymongo
