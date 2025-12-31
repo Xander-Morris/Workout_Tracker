@@ -1,5 +1,5 @@
 from pydantic import AwareDatetime, BaseModel, EmailStr, Field
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import List, Optional
 
 class UserCreate(BaseModel):
