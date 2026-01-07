@@ -3,7 +3,7 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useNavigate } from 'react-router-dom';
 
-const base_url = import.meta.env.BACKEND_BASE_URL;
+const base_url = import.meta.env.VITE_BACKEND_BASE_URL;
 
 const isAuthenticatedDefault = () => {
   const token = localStorage.getItem("access_token");
@@ -86,10 +86,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setToken(newToken);
       setUser({ email: email });
       toast.success("Login successful!");
-      navigate('/papers');
+      navigate('/workouts');
     } catch (error: any) {
       console.error("Login error:", error);
-      toast.error(error.response?.data?.error || "Login failed");
+      toast.error(error.response?.data?.detail || "Login failed");
     } finally {
       setIsLoading(false);
     }
@@ -108,10 +108,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const newToken = result.data.access_token;
       setToken(newToken);
       toast.success("Signup successful!");
-      navigate('/papers');
+      navigate('/workouts');
     } catch (error: any) {
       console.error("Signup error:", error);
-      toast.error(error.response?.data?.error || "Signup failed");
+      toast.error(error.response?.data?.detail || "Signup failed");
     } finally {
       setIsLoading(false);
     }

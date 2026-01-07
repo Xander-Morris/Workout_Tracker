@@ -8,6 +8,7 @@ import { AuthProvider } from './contexts/auth'
 import Home from './pages/Home';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
+import Workouts from './pages/Workouts';
 
 function Layout() {
   return (
@@ -36,6 +37,10 @@ function App() {
           path: "login",
           element: <Login />,
         },
+        {
+          path: "workouts",
+          element: <Workouts />
+        }
       ],
     },
   ]);
