@@ -22,7 +22,6 @@ const Home: FC = () => {
             </header>
 
             <main>
-                {/* HERO */}
                 <section className="relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/30 via-purple-600/20 to-pink-600/20 blur-3xl" />
 
@@ -47,7 +46,6 @@ const Home: FC = () => {
                     </div>
                 </section>
 
-                {/* FEATURES */}
                 <section className="bg-slate-900 border-t border-white/10">
                     <div className="max-w-6xl mx-auto px-6 py-24 grid grid-cols-1 sm:grid-cols-3 gap-8">
                         {[
