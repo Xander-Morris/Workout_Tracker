@@ -7,7 +7,7 @@ const base_url = import.meta.env.BACKEND_BASE_URL;
 
 const isAuthenticatedDefault = () => {
   const token = localStorage.getItem("access_token");
-  
+
   return !!token;
 };
 
@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (decoded) {
         setUser({
           _id: decoded.user_id,
-          username: decoded.username,
+          email: decoded.email,
           exp: decoded.exp,
         });
       } else {
@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const validateForm = (formData: any): boolean => {
     const newErrors: Record<string, string> = {};
-    if (!formData.username?.trim()) newErrors.username = "Username is required";
+    if (!formData.email?.trim()) newErrors.email = "Email is required";
     if (!formData.password) newErrors.password = "Password is required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -80,11 +80,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(base_url + "/api/auth/login", formData);
+      const response = await axios.post(base_url + "/login", formData);
       const newToken = response.data.access_token;
-      const username = response.data.username;
+      const email = response.data.email;
       setToken(newToken);
-      setUser({ username });
+      setUser({ email: email });
       toast.success("Login successful!");
       navigate('/papers');
     } catch (error: any) {
@@ -99,13 +99,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsLoading(true);
 
     try {
-      const username = formData['username'];
       const password = formData['password'];
       const email = formData['email'];
-      const result = await axios.post(base_url + "/api/auth/signup", {
-        username,
-        password,
+      const result = await axios.post(base_url + "/signup", {
         email,
+        password,
       });
       const newToken = result.data.access_token;
       setToken(newToken);
@@ -119,7 +117,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  // Logout
   const logout = async () => {
     setToken(null);
     setUser(null);

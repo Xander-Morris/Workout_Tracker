@@ -7,7 +7,6 @@ import { useState } from "react";
 const Signup: FC = () => {
     const { signup, isLoading, errors, setErrors, setIsLoading } = useAuth();
     const [formData, setFormData] = useState({
-        username: '',
         email: '',
         password: '',
         confirmPassword: ''
@@ -30,13 +29,6 @@ const Signup: FC = () => {
 
     const validateForm = () => {
         const newErrors: { [key: string]: string } = {};
-
-        // Username validation
-        if (!formData.username.trim()) {
-            newErrors.username = 'Username is required';
-        } else if (formData.username.length < 3) {
-            newErrors.username = 'Username must be at least 3 characters';
-        }
 
         // Email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -69,11 +61,9 @@ const Signup: FC = () => {
         const target = e.target as typeof e.target & {
             email: { value: string };
             password: { value: string };
-            username: { value: string };
         };
         const email = target.email.value;
         const password = target.password.value;
-        const username = target.username.value;
 
         if (!validateForm()) {
             return;
@@ -105,25 +95,6 @@ const Signup: FC = () => {
 
                 <div className="bg-white rounded-2xl shadow-xl p-8">
                     <form className="space-y-2" onSubmit={handleSubmit}>
-                        <div>
-                            <label htmlFor="username" className="text-left block text-sm font-medium text-gray-700 mb-2">
-                                Username
-                            </label>
-                            <input
-                                id="username"
-                                name="username"
-                                type="text"
-                                value={formData.username}
-                                onChange={handleChange}
-                                className={`text-gray-700 w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${errors.username ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                                    }`} 
-                                placeholder="Choose a username"
-                            />
-                            {errors.username && (
-                                <p className="mt-1 text-sm text-red-600">{errors.username}</p>
-                            )}
-                        </div>
-
                         <div>
                             <label htmlFor="email" className="text-left block text-sm font-medium text-gray-700 mb-2">
                                 Email address
@@ -180,7 +151,7 @@ const Signup: FC = () => {
                                 <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
                             )}
                         </div>
-
+                        
                         <button
                             type="submit"
                             disabled={isLoading}
@@ -219,7 +190,7 @@ const Signup: FC = () => {
                 <div className="text-center">
                     <Link
                         to="/"
-                        className="text-indigo-600 hover:text-indigo-500 text-sm font-medium transition-colors"
+                        className="text-indigo-700 hover:text-indigo-500 text-sm font-medium transition-colors"
                     >
                         ← Back to home
                     </Link>
