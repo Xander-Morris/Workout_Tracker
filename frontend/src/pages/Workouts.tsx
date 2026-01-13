@@ -183,7 +183,7 @@ const Workouts: FC = () => {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">My Workouts</h1>
-            <p className="text-gray-600 mt-1">{workouts.length} workouts scheduled</p>
+            <p className="text-gray-600 mt-1">Workouts scheduled: {workouts.length}</p>
           </div>
           <button
             onClick={() => {
