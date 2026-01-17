@@ -76,7 +76,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(base_url + "/auth/login", formData);
+      const response = await axios.post(base_url + "/login", formData);
       const newAccessToken = response.data.access_token;
       const newRefreshToken = response.data.refresh_token;
 
@@ -99,7 +99,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       const password = formData['password'];
       const email = formData['email'];
-      const result = await axios.post(base_url + "/auth/signup", {
+      const result = await axios.post(base_url + "/signup", {
         email,
         password,
       });
@@ -122,7 +122,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const logout = async () => {
     try {
       if (accessToken) {
-        await axios.post(base_url + "/auth/logout", {}, {
+        await axios.post(base_url + "/logout", {}, {
           headers: {
             "Authorization": `Bearer ${accessToken}`
           }
