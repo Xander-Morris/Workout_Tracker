@@ -26,7 +26,8 @@ async def SignUp(request: Request, user: models.UserCreate, response: Response):
     if database.DoesUserExist(user.email):
         raise HTTPException(status_code=400, detail="That email is already being used.")
     
-    
+    if not auth_helper.IsPasswordStrong(user.password):
+        raise HTTPException(status_code=400, detail="Password does not meet strength requirements.")
 
     hashed_password = auth_helper.GetPasswordHash(user.password)
     user_id = database.CreateUser(user.email, hashed_password)

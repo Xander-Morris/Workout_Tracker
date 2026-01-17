@@ -4,12 +4,37 @@ import { useAuth } from '../contexts/auth'
 import { Link } from "react-router-dom";
 import { useState } from "react";
 
+const checkPasswordStrength = (password: string) => {
+    const requirements = {
+        length: password.length >= 8,
+        uppercase: /[A-Z]/.test(password),
+        lowercase: /[a-z]/.test(password),
+        digit: /\d/.test(password),
+        special: /[^a-zA-Z0-9]/.test(password)
+    };
+
+    return requirements;
+};
+
+const isPasswordStrong = (password: string): boolean => {
+    const requirements = checkPasswordStrength(password);
+    
+    return Object.values(requirements).every(req => req);
+};
+
 const Signup: FC = () => {
     const { signup, isLoading, errors, setErrors, setIsLoading } = useAuth();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
         confirmPassword: ''
+    });
+    const [passwordRequirements, setPasswordRequirements] = useState({
+        length: false,
+        uppercase: false,
+        lowercase: false,
+        digit: false,
+        special: false
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -18,7 +43,11 @@ const Signup: FC = () => {
             ...prev,
             [name]: value
         }));
-        // Clear error when user starts typing
+
+        if (name === 'password') {
+            setPasswordRequirements(checkPasswordStrength(value));
+        }
+
         if (errors[name]) {
             setErrors(prev => ({
                 ...prev,
@@ -41,8 +70,8 @@ const Signup: FC = () => {
         // Password validation
         if (!formData.password) {
             newErrors.password = 'Password is required';
-        } else if (formData.password.length < 8) {
-            newErrors.password = 'Password must be at least 8 characters';
+        } else if (!isPasswordStrong(formData.password)) {
+            newErrors.password = 'Password does not meet strength requirements';
         }
 
         // Confirm password validation
@@ -122,6 +151,28 @@ const Signup: FC = () => {
                                     }`}
                                 placeholder="Create a password"
                             />
+
+                            {/* Password strength requirements */}
+                            {formData.password && (
+                                <div className="mt-2 space-y-1 text-xs">
+                                    <div className={`flex items-center ${passwordRequirements.length ? 'text-green-600' : 'text-gray-500'}`}>
+                                        <span className={`mr-2 ${passwordRequirements.length ? '✓' : '○'}`}>At least 8 characters</span>
+                                    </div>
+                                    <div className={`flex items-center ${passwordRequirements.uppercase ? 'text-green-600' : 'text-gray-500'}`}>
+                                        <span className={`mr-2 ${passwordRequirements.uppercase ? '✓' : '○'}`}>One uppercase letter</span>
+                                    </div>
+                                    <div className={`flex items-center ${passwordRequirements.lowercase ? 'text-green-600' : 'text-gray-500'}`}>
+                                        <span className={`mr-2 ${passwordRequirements.lowercase ? '✓' : '○'}`}>One lowercase letter</span>
+                                    </div>
+                                    <div className={`flex items-center ${passwordRequirements.digit ? 'text-green-600' : 'text-gray-500'}`}>
+                                        <span className={`mr-2 ${passwordRequirements.digit ? '✓' : '○'}`}>One number</span>
+                                    </div>
+                                    <div className={`flex items-center ${passwordRequirements.special ? 'text-green-600' : 'text-gray-500'}`}>
+                                        <span className={`mr-2 ${passwordRequirements.special ? '✓' : '○'}`}>One special character (!@#$%^&*)</span>
+                                    </div>
+                                </div>
+                            )}
+
                             {errors.password && (
                                 <p className="mt-1 text-sm text-red-600">{errors.password}</p>
                             )}
@@ -145,7 +196,7 @@ const Signup: FC = () => {
                                 <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
                             )}
                         </div>
-                        
+
                         <button
                             type="submit"
                             disabled={isLoading}
