@@ -34,9 +34,8 @@ class WorkoutResponse(WorkoutCreate):
         }
     }
 
-class ExerciseProgressReport(BaseModel):
+class WorkoutsThatContainExerciseReport(BaseModel):
     exercise: str
-    total_workouts_found: int
     workouts: List[WorkoutResponse]
     model_config = {"from_attributes": True}
 
@@ -48,3 +47,9 @@ class WorkoutUpdate(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+class AllExercisesReport(BaseModel):
+    exercises: List[str]
+
+class ExerciseRequest(BaseModel):
+    exercise: str

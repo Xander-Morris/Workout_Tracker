@@ -75,7 +75,7 @@ async def Login(request: Request, user: models.UserCreate, response: Response):
     )
 
 @router.post("/refresh", status_code=status.HTTP_200_OK)
-@limiter.limit("10/minute")
+@limiter.limit("5/minute")
 async def Refresh(request: Request, response: Response):
     refresh_token = request.cookies.get("refresh_token")
     if not refresh_token:
@@ -107,7 +107,8 @@ async def Refresh(request: Request, response: Response):
         )
 
 @router.post("/logout", status_code=status.HTTP_200_OK)
-async def Logout(current_user: models.CurrentUser = Depends(auth_helper.GetCurrentUser), response: Response = None):
+@limiter.limit("5/minute")
+async def Logout(request: Request, current_user: models.CurrentUser = Depends(auth_helper.GetCurrentUser), response: Response = None):
     database.RevokeAllUserRefreshTokens(current_user.user_id)
     
     if response:

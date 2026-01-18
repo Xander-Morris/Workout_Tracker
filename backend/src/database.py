@@ -140,6 +140,20 @@ def GetWorkoutById(workout_id: str, user_id: str) -> Optional[Dict]:
 
     return workout
 
+def GetAllExercisesForUser(user_id: str) -> List[str]:
+    workouts = GetDb()["workouts"]
+    pipeline = [
+        {"$match": {"user_id": user_id}},
+        {"$unwind": "$exercises"},
+        {"$group": {"_id": "$exercises.name"}},
+        {"$sort": {"_id": 1}}
+    ]
+    
+    cursor = workouts.aggregate(pipeline)
+    exercises = [doc["_id"] for doc in cursor]
+    
+    return exercises
+
 def GetWorkoutsThatContainExercise(user_id : str, exercise_name : str) -> Optional[Dict]:
     results = []
     workouts = GetDb()["workouts"]

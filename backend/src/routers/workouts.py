@@ -1,17 +1,22 @@
 from typing import List, Optional
 from bson import ObjectId
-from fastapi import Query, status, APIRouter, Depends, HTTPException
+from fastapi import Query, Request, status, APIRouter, Depends, HTTPException
 import database
 import models
 import auth_helper
 from datetime import datetime, timezone
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 router = APIRouter(tags=["workouts"], prefix="/workouts")
+limiter = Limiter(key_func=get_remote_address)
 MAXIMUM_WORKOUTS_PER_DAY = 5
 
 # CREATE
 @router.post("/", response_model=models.WorkoutResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit("10/minute")
 async def CreateWorkout(
+    request: Request,
     workout: models.WorkoutCreate,
     current_user = Depends(auth_helper.GetCurrentUser)
 ):
@@ -42,7 +47,9 @@ async def CreateWorkout(
 
 # UPDATE
 @router.put("/{workout_id}", response_model=models.WorkoutResponse, status_code=status.HTTP_200_OK)
+@limiter.limit("20/minute")
 async def UpdateWorkout(
+    request: Request,
     workout_id : str,
     workout_update : models.WorkoutUpdate,
     current_user = Depends(auth_helper.GetCurrentUser)
@@ -70,7 +77,9 @@ async def UpdateWorkout(
 
 # DELETE
 @router.delete("/{workout_id}", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit("10/minute")
 async def delete_workout(
+    request: Request,
     workout_id: str,
     current_user = Depends(auth_helper.GetCurrentUser)
 ):
@@ -86,7 +95,9 @@ async def delete_workout(
 
 # LIST - Sorted by scheduled_date, with filters
 @router.get("/", response_model=List[models.WorkoutResponse])
+@limiter.limit("20/minute")
 async def list_workouts(
+    request: Request,
     current_user = Depends(auth_helper.GetCurrentUser),
     start_date: Optional[datetime] = Query(None),
     end_date: Optional[datetime] = Query(None),
@@ -105,7 +116,9 @@ async def list_workouts(
 
 # GET SINGLE
 @router.get("/{workout_id}", response_model=models.WorkoutResponse)
+@limiter.limit("30/minute")
 async def GetWorkout(
+    request: Request,
     workout_id: str,
     current_user = Depends(auth_helper.GetCurrentUser)
 ):
