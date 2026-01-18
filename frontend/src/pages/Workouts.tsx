@@ -203,16 +203,32 @@ const Workouts: FC = () => {
     return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
   };
 
-  const goToPreviousDay = () => {
+  const changeDayOrMonth = (is_day : boolean, offset: number) => {
     const newDate = new Date(selectedDate);
-    newDate.setDate(newDate.getDate() - 1);
+
+    if (is_day) {
+      newDate.setDate(newDate.getDate() + offset);
+    } else {
+      newDate.setMonth(newDate.getMonth() + offset);
+    }
+
     setSelectedDate(newDate);
   };
 
+  const goToPreviousDay = () => {
+    changeDayOrMonth(true, -1);
+  };
+
   const goToNextDay = () => {
-    const newDate = new Date(selectedDate);
-    newDate.setDate(newDate.getDate() + 1);
-    setSelectedDate(newDate);
+    changeDayOrMonth(true, 1);
+  };
+
+  const goToPreviousMonth = () => {
+    changeDayOrMonth(false, -1);
+  };
+
+  const goToNextMonth = () => {
+    changeDayOrMonth(false, 1);
   };
 
   const selectDateFromCalendar = (day: number) => {
@@ -223,18 +239,6 @@ const Workouts: FC = () => {
 
   const goToTodayInCalendar = () => {
     setCalendarDate(new Date());
-  };
-
-  const goToPreviousMonth = () => {
-    const newDate = new Date(calendarDate);
-    newDate.setMonth(newDate.getMonth() - 1);
-    setCalendarDate(newDate);
-  };
-
-  const goToNextMonth = () => {
-    const newDate = new Date(calendarDate);
-    newDate.setMonth(newDate.getMonth() + 1);
-    setCalendarDate(newDate);
   };
 
   if (loading && workouts.length === 0) {
