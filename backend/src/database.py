@@ -175,7 +175,7 @@ def GetWorkoutsThatContainExercise(user_id : str, exercise_name : str) -> Option
     
     return results
 
-def StoreRefreshToken(user_id: str, token_hash: str, expires_at: datetime, email: str, family_id: Optional[str] = None, device_fingerprint: Optional[str] = None, ip_address: Optional[str] = None, parent_token_id: Optional[str] = None) -> str:
+def StoreRefreshToken(user_id: str, token_hash: str, expires_at: datetime, email: str, family_id: Optional[str] = None, device_fingerprint: Optional[str] = None, parent_token_id: Optional[str] = None) -> str:
     refresh_tokens = GetDb()["refresh_tokens"]
 
     result = refresh_tokens.insert_one({
@@ -187,7 +187,6 @@ def StoreRefreshToken(user_id: str, token_hash: str, expires_at: datetime, email
         "is_revoked": False,
         "family_id": family_id,
         "device_fingerprint": device_fingerprint,
-        "ip_address": ip_address,
         "parent_token_id": parent_token_id
     })
 
@@ -207,7 +206,6 @@ def GetRefreshTokenInfo(token_hash: str) -> Optional[Dict]:
             "email": token["email"],
             "family_id": token.get("family_id"),
             "device_fingerprint": token.get("device_fingerprint"),
-            "ip_address": token.get("ip_address"),
             "token_id": str(token["_id"])
         }
     
@@ -251,7 +249,7 @@ def RevokeTokenFamily(family_id: str) -> int:
     
     return result.modified_count
 
-def DetectTokenReuse(family_id: str, current_token_id: str) -> bool:
+def DetectTokenReuse(current_token_id: str) -> bool:
     refresh_tokens = GetDb()["refresh_tokens"]
     token = refresh_tokens.find_one({"_id": ObjectId(current_token_id)})
     

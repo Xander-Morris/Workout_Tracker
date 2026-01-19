@@ -58,7 +58,7 @@ def CreateAccessToken(user_id: str, email: str) -> str:
 
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
-def CreateTokenPair(user_id: str, email: str, device_fingerprint: str, ip_address: str, family_id: str = None) -> tuple:
+def CreateTokenPair(user_id: str, email: str, device_fingerprint: str, family_id: str = None) -> tuple:
     access_token = CreateAccessToken(user_id, email)
     
     raw_refresh_token, refresh_token_hash = CreateRefreshToken()
@@ -74,12 +74,11 @@ def CreateTokenPair(user_id: str, email: str, device_fingerprint: str, ip_addres
         email,
         family_id=family_id,
         device_fingerprint=device_fingerprint,
-        ip_address=ip_address
     )
     
     return access_token, raw_refresh_token
 
-def ValidateRefreshTokenAndGetUser(raw_refresh_token: str, device_fingerprint: str, ip_address: str) -> dict:
+def ValidateRefreshTokenAndGetUser(raw_refresh_token: str, device_fingerprint: str) -> dict:
     token_hash = hashlib.sha256(raw_refresh_token.encode()).hexdigest()
     result = database.GetRefreshTokenInfo(token_hash)
 
@@ -89,17 +88,19 @@ def ValidateRefreshTokenAndGetUser(raw_refresh_token: str, device_fingerprint: s
     if result.get("device_fingerprint") != device_fingerprint:
         raise ValueError("Token used from different device - potential compromise detected")
     
-    if result.get("ip_address") != ip_address:
-        raise ValueError("Token used from different IP - potential compromise detected")
-    
     return result
 
-def RefreshAccessToken(raw_refresh_token: str, device_fingerprint: str, ip_address: str) -> tuple:
-    token_info = ValidateRefreshTokenAndGetUser(raw_refresh_token, device_fingerprint, ip_address)
+def RefreshAccessToken(raw_refresh_token: str, device_fingerprint: str) -> tuple:
+    token_info = ValidateRefreshTokenAndGetUser(raw_refresh_token, device_fingerprint)
     
     user_id = token_info["user_id"]
     email = token_info["email"]
     family_id = token_info["family_id"]
+    token_id = token_info["token_id"]
+    
+    if database.DetectTokenReuse(token_id):
+        database.RevokeTokenFamily(family_id)
+        raise ValueError("Refresh token reuse detected")
     
     RevokeRefreshToken(raw_refresh_token)
     
@@ -107,7 +108,6 @@ def RefreshAccessToken(raw_refresh_token: str, device_fingerprint: str, ip_addre
         user_id, 
         email, 
         device_fingerprint, 
-        ip_address, 
         family_id=family_id
     )
     
