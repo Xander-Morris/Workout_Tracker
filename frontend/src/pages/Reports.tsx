@@ -11,7 +11,7 @@ const Reports: FC = () => {
     type REPORT_TYPE_OPEN = "contains" | "volume" | "1rm";
 
     const [reportType, setReportType] = useState<REPORT_TYPE_OPEN>("contains");
-    const [isVisible, setIsVisible] = useState(false);
+    const [dropdownVisible, setDropdownVisible] = useState<boolean>(false);
     const [exercises, setExercises] = useState<string[]>([]);
     const [selectedExercise, setSelectedExercise] = useState("");
     const [status, setStatus] = useState<STATUS_TYPE>("none");
@@ -58,10 +58,12 @@ const Reports: FC = () => {
     const handleToggle = (exercise: string) => {
         const isDeselecting = selectedExercise === exercise;
         setSelectedExercise(isDeselecting ? "" : exercise);
-        setIsVisible(false);
+        setDropdownVisible(false);
     };
 
-    const toggleDropdown = () => setIsVisible(v => !v);
+    const toggleDropdown = () => {
+        setDropdownVisible(!dropdownVisible);
+    };
 
     useEffect(() => {
         fetchAllExercises();
@@ -76,7 +78,7 @@ const Reports: FC = () => {
         setSelectedExercise("");
         setWorkouts([]);
         setStatus("none");
-        setIsVisible(false);
+        setDropdownVisible(false);
     }, [reportType]);
 
     const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -138,20 +140,18 @@ const Reports: FC = () => {
                 {/* Report: Contains */}
                 {reportType === "contains" && (
                     <div className="flex justify-center pt-32">
-                        <div className="w-full max-w-3xl px-4 flex flex-col items-center space-y-4">
-                            {/* Heading */}
+                        <div className="w-full max-w-3xl px-4 flex flex-col items-center space-y-4 transform -translate-y-[40px]">
                             <h1 className="text-gray-900 text-lg text-center">
                                 Select an exercise to show all workouts that contain it.
                             </h1>
 
-                            {/* Selector */}
-                            {ExerciseDropdown(
-                                toggleDropdown,
-                                () => isVisible,
-                                () => selectedExercise || null,
-                                () => exercises,
-                                handleToggle
-                            )}
+                            <ExerciseDropdown
+                                toggleDropdown={toggleDropdown}
+                                isVisible={dropdownVisible}
+                                selectedExercise={selectedExercise}
+                                exercises={exercises}
+                                handleToggle={handleToggle}
+                            />
 
                             {/* Report Panel */}
                             <div className="w-full rounded-xl bg-white p-6 shadow-md">
@@ -235,7 +235,7 @@ const Reports: FC = () => {
                 {/* Report: Volume */}
                 {reportType === "volume" && (
                     <div className="flex justify-center pt-32">
-                        <div className="w-full max-w-3xl px-4 flex flex-col items-center space-y-4">
+                        <div className="w-full max-w-3xl px-4 flex flex-col items-center space-y-4 transform -translate-y-[40px]">
                         <h1 className="text-gray-900 text-lg">Volume Report</h1>
                         {/* Start date */}
                         <div className="flex items-center space-x-8">
@@ -255,14 +255,13 @@ const Reports: FC = () => {
                             Optionally select an exercise to only include it.
                         </h1>
 
-                        {/* Selector */}
-                        {ExerciseDropdown(
-                            toggleDropdown,
-                            () => isVisible,
-                            () => selectedExercise || null,
-                            () => exercises,
-                            handleToggle
-                        )}
+                        <ExerciseDropdown
+                            toggleDropdown={toggleDropdown}
+                            isVisible={dropdownVisible}
+                            selectedExercise={selectedExercise}
+                            exercises={exercises}
+                            handleToggle={handleToggle}
+                        />
 
                         <button onClick={generateVolumeReport} className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white">
                             Generate Report

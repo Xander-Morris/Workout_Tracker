@@ -50,9 +50,9 @@ export const Navbar = () => {
                             Login
                         </Link>
                             <Link to="/signup">
-                                <a className="text-white-900 px-4 py-2 rounded-full bg-indigo-500 font-medium hover:bg-indigo-400 transition">
+                                <label className="text-white-900 px-4 py-2 rounded-full bg-indigo-500 font-medium hover:bg-indigo-400 transition">
                                     Sign Up
-                                </a>
+                                </label>
                             </Link></>}
                 </nav>
             </div>

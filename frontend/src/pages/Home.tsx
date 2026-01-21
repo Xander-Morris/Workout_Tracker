@@ -25,9 +25,9 @@ const Home: FC = () => {
 
                             <div className="mt-10 flex gap-4">
                                 <Link to="/signup">
-                                <a className="px-6 py-3 rounded-full bg-indigo-500 text-white font-medium hover:bg-indigo-400 transition">
+                                <label className="px-6 py-3 rounded-full bg-indigo-500 text-white font-medium hover:bg-indigo-400 transition">
                                     Get started free
-                                </a>
+                                </label>
                                 </Link>
                             </div>
                         </div>

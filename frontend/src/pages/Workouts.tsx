@@ -315,17 +315,17 @@ const Workouts: FC = () => {
             </div>
 
             {/* Calendar Picker Modal */}
-            {showCalendarPicker && CalendarPicker(
-              goToPreviousMonth,
-              goToNextMonth,
-              goToTodayInCalendar,
-              calendarDate,
-              selectedDate,
-              getFirstDayOfMonth,
-              getDaysInMonth,
-              selectDateFromCalendar,
-              getWorkoutsForDate
-            )}
+            {showCalendarPicker && <CalendarPicker
+              calendarDate={calendarDate}
+              selectedDate={selectedDate}
+              goToPreviousMonth={goToPreviousMonth}
+              goToNextMonth={goToNextMonth}
+              goToTodayInCalendar={goToTodayInCalendar}
+              getFirstDayOfMonth={getFirstDayOfMonth}
+              getDaysInMonth={getDaysInMonth}
+              selectDateFromCalendar={selectDateFromCalendar}
+              getWorkoutsForDate={getWorkoutsForDate}
+            />}
           </div>
         </div>
 
