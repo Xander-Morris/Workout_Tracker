@@ -57,6 +57,12 @@ async def GetVolumeOverPeriodReport(
     exercise = ""
     total_volume = 0
 
+    if payload.start_date >= payload.end_date:
+        raise HTTPException(
+            status_code=400,
+            detail="Start date must be before end date!"
+        )
+
     if payload.exercise: 
         exercise = payload.exercise.strip() or ""
 
@@ -72,6 +78,9 @@ async def GetVolumeOverPeriodReport(
             raise HTTPException(status_code=404, detail="Workouts not found")
     
         for workout in workouts:
+            if workout["scheduled_date"] < payload.start_date or workout["scheduled_date"] > payload.end_date:
+                continue
+
             for ex in workout["exercises"]:
                 if ex["name"].lower() == exercise.lower():
                     AddToTotalVolume(ex)

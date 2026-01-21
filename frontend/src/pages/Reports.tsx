@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { apiClient } from "../lib/apiclient";
 import { Navbar } from "../components/navbar";
 import { ExerciseDropdown } from "../components/exercise_dropdown";
+import { DatesLibrary } from "../lib/dates";
+import { Notifications } from '../lib/notifications';
 
 const Reports: FC = () => {
     type STATUS_TYPE = "none" | "loading" | "error" | "success";
@@ -16,6 +18,8 @@ const Reports: FC = () => {
     const [workouts, setWorkouts] = useState<Workout[]>([]);
     const [startDate, setStartDate] = useState<string>("");
     const [endDate, setEndDate] = useState<string>("");
+    const [volumeReportTotal, setVolumeReportTotal] = useState<number | null>(null);
+    const [volumeReportExercise, setVolumeReportExercise] = useState<string | null>(null);
 
     const setReportTypeToContains = () => setReportType("contains");
     const setReportTypeToVolume = () => setReportType("volume");
@@ -45,7 +49,7 @@ const Reports: FC = () => {
             setWorkouts(response.data.workouts);
             setStatus("success");
         } catch (error) {
-            console.error("Error fetching workouts report:", error);
+            Notifications.showError(error);
             setWorkouts([]);
             setStatus("error");
         }
@@ -91,9 +95,10 @@ const Reports: FC = () => {
             end_date: new Date(endDate).toISOString(),
             exercise: selectedExercise || null,
         }).then(response => {
-            console.log("Volume Report Data:", response.data);
+            setVolumeReportTotal(response.data.total_volume);
+            setVolumeReportExercise(response.data.exercise || null);
         }).catch(error => {
-            console.error("Error generating volume report:", error);
+            Notifications.showError(error);
         });
     };
 
@@ -237,14 +242,14 @@ const Reports: FC = () => {
                             <label className="block text-gray-900 min-w-20 max-w-20">
                                 Start Date:
                             </label>
-                            <input onChange={handleStartDateChange} type="date" className="bg-gray-600 border border-gray-300 rounded-lg px-4 py-2 w-full max-w-xs" />
+                            <input onChange={handleStartDateChange} type="date" max={DatesLibrary.getLocalToday()} className="bg-gray-600 border border-gray-300 rounded-lg px-4 py-2 w-full max-w-xs" />
                         </div>
                         {/* End date */}
                         <div className="flex items-center space-x-8">
                             <label className="block text-gray-900 min-w-20 max-w-20">
                                 End Date:
                             </label>
-                            <input onChange={handleEndDateChange} type="date" className="bg-gray-600 border border-gray-300 rounded-lg px-4 py-2 w-full max-w-xs" />
+                            <input onChange={handleEndDateChange} type="date" max={DatesLibrary.getLocalToday()} className="bg-gray-600 border border-gray-300 rounded-lg px-4 py-2 w-full max-w-xs" />
                         </div>
                         <h1 className="text-gray-900 text-lg text-center">
                             Optionally select an exercise to only include it.
@@ -262,6 +267,13 @@ const Reports: FC = () => {
                         <button onClick={generateVolumeReport} className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white">
                             Generate Report
                         </button>
+                        {volumeReportTotal !== null && (
+                            <div className="mt-8 w-100 px-4 flex flex-col items-center space-y-4">
+                                <h2 className="text-xl font-semibold text-gray-600">
+                                    Total Volume {volumeReportExercise ? `for ${volumeReportExercise}` : ""}: {volumeReportTotal} lbs
+                                </h2>
+                            </div>
+                        )}
                         </div>
                     </div>
                 )}

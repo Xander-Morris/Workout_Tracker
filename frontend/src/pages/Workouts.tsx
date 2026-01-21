@@ -5,28 +5,18 @@ import { Calendar, Plus, Edit2, Trash2, X, Check, ChevronDown, ChevronUp, Chevro
 import Swal from 'sweetalert2';
 import { Navbar } from "../components/navbar.tsx";
 import { CalendarPicker } from '../components/calendar_picker';
+import { DatesLibrary } from '../lib/dates';
+import { Notifications } from '../lib/notifications';
 
 const Workouts: FC = () => {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [showCalendarPicker, setShowCalendarPicker] = useState(false);
   const [calendarDate, setCalendarDate] = useState<Date>(new Date());
-
-  const getDateToLocaleDateTime = () => {
-    const year = selectedDate.getFullYear();
-    const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
-    const day = String(selectedDate.getDate()).padStart(2, '0');
-    const hours = String(selectedDate.getHours()).padStart(2, '0');
-    const minutes = String(selectedDate.getMinutes()).padStart(2, '0');
-    const localDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
-
-    return localDateTime;
-  }
 
   const [formData, setFormData] = useState<WorkoutFormData>({
     name: '',
@@ -35,23 +25,20 @@ const Workouts: FC = () => {
     comments: ''
   });
 
-  const handleError = (err: any) => {
-    const errorMessage = err.response?.data?.detail || err.message || 'An error occurred';
-    setError(errorMessage);
-  }
-
   const fetchWorkouts = async () => {
     try {
       setLoading(true);
       const response = await apiClient.get(`/workouts/`);
 
-      if (response.status !== 200) throw new Error('Failed to fetch workouts');
+      if (response.status !== 200) {
+        Notifications.showError('Failed to fetch workouts');
+        return;
+      };
 
       const data = response.data;
       setWorkouts(data);
-      setError(null);
     } catch (err : any) {
-      handleError(err);
+      Notifications.showError(err);
     } finally {
       setLoading(false);
     }
@@ -70,13 +57,16 @@ const Workouts: FC = () => {
         comments: formData.comments
       });
 
-      if (response.status !== 201) throw new Error('Failed to create workout');
+      if (response.status !== 201) {
+        Notifications.showError("Failed to create workout");
+        return;
+      }
 
       await fetchWorkouts();
       resetForm();
       setIsCreating(false);
     } catch (err : any) {
-      handleError(err);
+      Notifications.showError(err);
     }
   };
 
@@ -95,7 +85,7 @@ const Workouts: FC = () => {
       resetForm();
       setEditingId(null);
     } catch (err : any) {
-      handleError(err);
+      Notifications.showError(err);
     }
   };
 
@@ -124,14 +114,14 @@ const Workouts: FC = () => {
 
       await fetchWorkouts();
     } catch (err : any) {
-      handleError(err);
+      Notifications.showError(err);
     }
   };
 
   const resetForm = () => {
     setFormData({
       name: '',
-      scheduled_date: getDateToLocaleDateTime(),
+      scheduled_date: DatesLibrary.getDateToLocaleDateTime(selectedDate),
       exercises: [],
       comments: ''
     });
@@ -140,7 +130,7 @@ const Workouts: FC = () => {
   const startEdit = (workout: Workout) => {
     setFormData({
       name: workout.name,
-      scheduled_date: getDateToLocaleDateTime(),
+      scheduled_date: DatesLibrary.getDateToLocaleDateTime(selectedDate),
       exercises: workout.exercises || [],
       comments: workout.comments || ''
     });
@@ -338,12 +328,6 @@ const Workouts: FC = () => {
             )}
           </div>
         </div>
-
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-            {error}
-          </div>
-        )}
 
         {/* Create/Edit Form */}
         {(isCreating || editingId) && (
