@@ -270,7 +270,7 @@ const Reports: FC = () => {
                         {volumeReportTotal !== null && (
                             <div className="mt-8 w-100 px-4 flex flex-col items-center space-y-4">
                                 <h2 className="text-xl font-semibold text-gray-600">
-                                    Total Volume {volumeReportExercise ? `for ${volumeReportExercise}` : ""}: {volumeReportTotal} lbs
+                                    Total volume {volumeReportExercise ? `for ${volumeReportExercise}` : "for all exercises"}: {volumeReportTotal} lbs
                                 </h2>
                             </div>
                         )}
