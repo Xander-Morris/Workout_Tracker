@@ -233,7 +233,7 @@ const Workouts: FC = () => {
   };
 
   const goToTodayInCalendar = () => {
-    setCalendarDate(new Date());
+    selectDateFromCalendar(new Date().getDate());
   };
 
   if (loading && workouts.length === 0) {
