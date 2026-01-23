@@ -368,7 +368,7 @@ const Workouts: FC = () => {
 
                 {formData.exercises.length > 0 && (
                   <div className="grid grid-cols-12 gap-2 sm:gap-3 mb-2">
-                    <div className="col-span-5 sm:col-span-5">
+                    <div className="col-span-4">
                       <p className="text-xs sm:text-sm font-medium text-gray-700">Name</p>
                     </div>
                     <div className="col-span-2">
@@ -386,7 +386,7 @@ const Workouts: FC = () => {
 
                 {formData.exercises.map((exercise, index) => (
                   <div key={index} className="grid grid-cols-12 gap-2 sm:gap-3 mb-2 items-end">
-                    <div className="col-span-5">
+                    <div className="col-span-4">
                       {createUpdateExerciseField(exercise, index, 'name', 'text')}
                     </div>
                     <div className="col-span-2">
@@ -398,10 +398,10 @@ const Workouts: FC = () => {
                     <div className="col-span-2">
                       {createUpdateExerciseField(exercise, index, 'weight', 'number')}
                     </div>
-                    <div className="col-span-1 flex items-center justify-center h-full">
+                    <div className="col-span-2 flex items-center justify-center h-full">
                       <button
                         onClick={() => removeExercise(index)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors flex items-center justify-center w-full h-full"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-100 bg-red-50 p-2 rounded-lg transition-colors flex items-center justify-center w-full h-full"
                       >Delete
                       </button>
                     </div>
