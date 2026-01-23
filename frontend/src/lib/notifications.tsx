@@ -8,8 +8,6 @@ export const Notifications = {
             errorMessage = 'An error occurred';
         }
 
-        console.log(errorMessage);
-
         toast.error(errorMessage);
     },
 };
