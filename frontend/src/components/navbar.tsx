@@ -19,7 +19,7 @@ export const Navbar = () => {
                         {(pathname != "/workouts") ? <>
                             <Link to="/workouts">
                                 <button
-                                    className="text-white-900 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                                    className="text-white-900 bg-blue-400 hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                                 >
                                     Workouts
                                 </button>
@@ -28,7 +28,7 @@ export const Navbar = () => {
                         {(pathname != "/reports") ? <>
                             <Link to="/reports">
                                 <button
-                                    className="text-white-900 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                                    className="text-white-900 bg-blue-400 hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                                 >
                                     Reports
                                 </button>
@@ -36,7 +36,7 @@ export const Navbar = () => {
                         </> : <></>}
                         <button
                             onClick={logout}
-                            className="text-white-900 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                            className="text-white-900 bg-blue-400 hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                         >
                             Logout
                         </button>
