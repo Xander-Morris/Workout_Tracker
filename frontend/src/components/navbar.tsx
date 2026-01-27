@@ -16,6 +16,15 @@ export const Navbar = () => {
 
                 <nav className="flex items-center gap-4">
                     {(user && Object.keys(user).length != 0) ? <>
+                        {(pathname != "/") ? <>
+                            <Link to="/">
+                                <button
+                                    className="text-white-900 bg-blue-400 hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                                >
+                                    Home
+                                </button>
+                            </Link>
+                        </> : <></>}
                         {(pathname != "/workouts") ? <>
                             <Link to="/workouts">
                                 <button
