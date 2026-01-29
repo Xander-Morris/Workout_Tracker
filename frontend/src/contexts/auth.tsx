@@ -82,8 +82,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const validateForm = (formData: any): boolean => {
     const newErrors: Record<string, string> = {};
-    if (!formData.email?.trim()) newErrors.email = "Email is required";
-    if (!formData.password) newErrors.password = "Password is required";
+    console.log(formData);
+    if (formData.email?.trim().length === 0) newErrors.email = "Email is required";
+    if (formData.username?.trim().length === 0) newErrors.username = "Username is required";
+    if (formData.email_or_username?.trim().length === 0) newErrors.email_or_username = "Email or username is required";
+    if (formData.password?.trim().length === 0) newErrors.password = "Password is required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -93,7 +96,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(base_url + "/auth/login", formData, {
+      const email_or_username: string = formData["email_or_username"];
+      const password: string = formData["password"];
+      const request_data = {email_or_username, password};
+      console.log(request_data);
+      const response = await axios.post(base_url + "/auth/login", request_data, {
         withCredentials: true,  // Enable cookies
       });
       const newAccessToken = response.data.access_token;
@@ -111,15 +118,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const signup = async (formData: any) => {
+    if (!validateForm(formData)) return;
     setIsLoading(true);
 
     try {
-      const password = formData['password'];
-      const email = formData['email'];
-      const result = await axios.post(base_url + "/auth/signup", {
-        email,
-        password,
-      }, {
+      const email: string = formData["email"];
+      const username: string = formData["username"];
+      const password: string = formData["password"];
+      const request_data = {email, username, password};
+      const result = await axios.post(base_url + "/auth/signup", request_data, {
         withCredentials: true,  // Enable cookies
       });
       const newAccessToken = result.data.access_token;

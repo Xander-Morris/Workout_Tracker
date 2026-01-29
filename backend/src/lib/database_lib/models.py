@@ -4,8 +4,14 @@ from typing import List, Optional
 
 class UserCreate(BaseModel):
     email: EmailStr
+    username: str
     password: str
 
+class UserLogin(BaseModel):
+    email_or_username: str
+    password: str
+
+# Only the user id and email are needed for the current user.
 class CurrentUser(BaseModel):
     user_id: str
     email: str

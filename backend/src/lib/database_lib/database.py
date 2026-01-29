@@ -11,18 +11,21 @@ client = MongoClient(MONGO_URI)
 def GetDb():
     return client["database"]
 
-def DoesUserExist(email: str) -> bool:
+# Both the email and the username must be unique at this point in time.
+# This might change in the future.
+def DoesUserExist(email: str | None = None, username: str | None = None) -> bool:
     users = GetDb()["users"]
 
-    return users.find_one({"email": email}) is not None
+    return (email and users.find_one({"email": email}) is not None) or (username and users.find_one({"username": username}) is not None)
 
-def CreateUser(email: str, hashed_password: str) -> str:
-    if DoesUserExist(email):
+def CreateUser(email: str, username: str, hashed_password: str) -> str:
+    if DoesUserExist(email, username):
         raise ValueError("User already exists") 
 
     users = GetDb()["users"]
     result = users.insert_one({
         "email": email,
+        "username": username,
         "password": hashed_password
     })
     
@@ -34,6 +37,29 @@ def GetUserIdByEmail(email: str) -> str | None:
 
     if user:
         return str(user["_id"])
+    
+    return None
+
+def GetUsernameByEmail(email: str) -> str | None: 
+    users = GetDb()["users"]
+    user = users.find_one({"email": email})
+
+    if user:
+        return user["username"]
+    
+    return None
+
+def GetUserEmailByEmailOrUsername(email_or_username: str) -> str | None: 
+    users = GetDb()["users"]
+    user = users.find_one({"email": email_or_username})
+
+    if user:
+        return user["email"]
+    
+    user = users.find_one({"username": email_or_username})
+
+    if user:
+        return user["email"]
     
     return None
 

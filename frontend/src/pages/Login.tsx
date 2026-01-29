@@ -8,7 +8,7 @@ const Login: FC = () => {
     const { login, isLoading, errors } = useAuth();
 
     const [formData, setFormData] = useState({
-        email: '',
+        email_or_username: '',
         password: ''
     });
 
@@ -39,19 +39,20 @@ const Login: FC = () => {
 
                 <div className="bg-white rounded-2xl shadow-xl p-8">
                     <form className="space-y-6" onSubmit={handleSubmit}>
+                        {/* Email or username field */}
                         <div>
-                            <label htmlFor="email" className="text-left block text-sm font-medium text-gray-700 mb-2">
-                                Email
+                            <label htmlFor="email_or_username" className="text-left block text-sm font-medium text-gray-700 mb-2">
+                                Email or Username
                             </label>
                             <input
-                                id="email"
-                                name="email"
+                                id="email_or_username"
+                                name="email_or_username"
                                 type="text"
-                                value={formData.email}
+                                value={formData.email_or_username}
                                 onChange={handleChange}
-                                className={`text-gray-700 w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${errors.email ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                                className={`text-gray-700 w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${errors.email_or_username ? 'border-red-300 bg-red-50' : 'border-gray-300'
                                     }`}
-                                placeholder="Enter your email"
+                                placeholder="Enter your email or username"
                             />
                         </div>
 
@@ -72,25 +73,14 @@ const Login: FC = () => {
                             />
                         </div>
 
-                        {/* This may be added later
+                        {/* This should be added eventually for polishing reasons.
                         <div className="flex items-center justify-between">
-                            <div className="flex items-center">
-                                <input
-                                    id="remember-me"
-                                    name="remember-me"
-                                    type="checkbox"
-                                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                                />
-                                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                                    Remember me
-                                </label>
-                            </div>
                             <div className="text-sm">
                                 <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors">
                                     Forgot your password?
                                 </a>
                             </div>
-                        </div>
+                        </div>  
                         */}
 
                         <button

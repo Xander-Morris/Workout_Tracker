@@ -26,6 +26,7 @@ const Signup: FC = () => {
     const { signup, isLoading, errors, setErrors, setIsLoading } = useAuth();
     const [formData, setFormData] = useState({
         email: '',
+        username: '',
         password: '',
         confirmPassword: ''
     });
@@ -66,6 +67,11 @@ const Signup: FC = () => {
         } else if (!emailRegex.test(formData.email)) {
             newErrors.email = 'Please enter a valid email address';
         }
+
+        // Username validation
+        if (!formData.username) {
+            newErrors.username = "Username is required";
+        } 
 
         // Password validation
         if (!formData.password) {
@@ -118,7 +124,7 @@ const Signup: FC = () => {
 
                 <div className="bg-white rounded-2xl shadow-xl p-8">
                     <form className="space-y-2" onSubmit={handleSubmit}>
-                        <div>
+                        <div className="transform translate-y-[-6px]">
                             <label htmlFor="email" className="text-left block text-sm font-medium text-gray-700 mb-2">
                                 Email address
                             </label>
@@ -137,7 +143,26 @@ const Signup: FC = () => {
                             )}
                         </div>
 
-                        <div>
+                        <div className="transform translate-y-[-6px]">
+                            <label htmlFor="username" className="text-left block text-sm font-medium text-gray-700 mb-2">
+                                Username
+                            </label>
+                            <input
+                                id="username"
+                                name="username"
+                                type="username"
+                                value={formData.username}
+                                onChange={handleChange}
+                                className={`text-gray-700 w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${errors.username ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                                    }`}
+                                placeholder="Enter your username"
+                            />
+                            {errors.username && (
+                                <p className="mt-1 text-sm text-red-600">{errors.username}</p>
+                            )}
+                        </div>
+
+                        <div className="transform translate-y-[-6px]">
                             <label htmlFor="password" className="text-left block text-sm font-medium text-gray-700 mb-2">
                                 Password
                             </label>
@@ -178,7 +203,7 @@ const Signup: FC = () => {
                             )}
                         </div>
 
-                        <div>
+                        <div className="transform translate-y-[-6px]">
                             <label htmlFor="confirmPassword" className="text-left block text-sm font-medium text-gray-700 mb-2">
                                 Confirm Password
                             </label>

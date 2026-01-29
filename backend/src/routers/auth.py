@@ -25,14 +25,14 @@ def ResponseSetCookieHelper(response: Response, refresh_token: str):
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
 @limiter.limit("5/minute")
 async def SignUp(request: Request, user: models.UserCreate, response: Response):
-    if database.DoesUserExist(user.email):
-        raise HTTPException(status_code=400, detail="That email is already being used.")
+    if database.DoesUserExist(user.email, user.username):
+        raise HTTPException(status_code=400, detail="Either your email or username is already being used.")
     
     if not auth_helper.IsPasswordStrong(user.password):
         raise HTTPException(status_code=400, detail="Password does not meet strength requirements.")
 
     hashed_password = auth_helper.GetPasswordHash(user.password)
-    user_id = database.CreateUser(user.email, hashed_password)
+    user_id = database.CreateUser(user.email, user.username, hashed_password)
     device_fingerprint = auth_helper.GenerateDeviceFingerprint(request)
     access_token, refresh_token = auth_helper.CreateTokenPair(user_id, user.email, device_fingerprint)
     
@@ -45,18 +45,23 @@ async def SignUp(request: Request, user: models.UserCreate, response: Response):
 
 @router.post("/login", status_code=status.HTTP_200_OK)
 @limiter.limit("5/minute")
-async def Login(request: Request, user: models.UserCreate, response: Response):
-    if not database.DoesUserExist(user.email):
-        raise HTTPException(status_code=400, detail="That email is not being used in any account.")
-    
-    hashed_password = database.GetUserHashedPasswordInDB(user.email)
+async def Login(request: Request, user: models.UserLogin, response: Response):
+    email = database.GetUserEmailByEmailOrUsername(user.email_or_username)
+    username = database.GetUsernameByEmail(email)
+
+    if not database.DoesUserExist(email, username):
+        raise HTTPException(status_code=400, detail="That email or username is not being used in any account.")
+
+    hashed_password = database.GetUserHashedPasswordInDB(email)
+    print(user.password)
+    print(hashed_password)
 
     if not auth_helper.VerifyPassword(user.password, hashed_password):
         raise HTTPException(status_code=401, detail="You sent incorrect authentication details.")
     
-    user_id = database.GetUserIdByEmail(user.email)
+    user_id = database.GetUserIdByEmail(email)
     device_fingerprint = auth_helper.GenerateDeviceFingerprint(request)
-    access_token, refresh_token = auth_helper.CreateTokenPair(user_id, user.email, device_fingerprint)
+    access_token, refresh_token = auth_helper.CreateTokenPair(user_id, email, device_fingerprint)
     
     ResponseSetCookieHelper(response, refresh_token)
     
