@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Request
-import lib.database_lib.database as database
+import lib.database_lib.workout_methods as workout_methods
 import lib.database_lib.models as models
 import lib.database_lib.auth_helper as auth_helper
 from config import limiter
@@ -14,7 +14,7 @@ router = APIRouter(tags=["reports"], prefix="/reports")
 async def GetAllExercisesReport(
     request: Request, current_user = Depends(auth_helper.GetCurrentUser)
 ):
-    exercises = database.GetAllExercisesForUser(current_user.user_id)
+    exercises = workout_methods.GetAllExercisesForUser(current_user.user_id)
 
     return models.AllExercisesReport(
         exercises=exercises
@@ -33,7 +33,7 @@ async def GetReport(
     if not exercise.strip():
         raise APIError.validation_error(ErrorMessage.EMPTY_INPUT)
 
-    workouts = database.GetWorkoutsThatContainExercise(current_user.user_id, exercise)
+    workouts = workout_methods.GetWorkoutsThatContainExercise(current_user.user_id, exercise)
 
     if not workouts or len(workouts) <= 0:
         raise APIError.not_found("Workouts")
@@ -69,14 +69,14 @@ async def GetVolumeOverPeriodReport(
         total_volume += ex["sets"] * ex["reps"] * (ex.get("weight") or 0)
 
     if exercise:
-        workouts = database.GetWorkoutsThatContainExercise(
+        workouts = workout_methods.GetWorkoutsThatContainExercise(
             current_user.user_id,
             exercise,
             start_utc,
             end_utc,
         )
     else:
-        workouts = database.GetAllWorkoutsInPeriod(
+        workouts = workout_methods.GetAllWorkoutsInPeriod(
             current_user.user_id,
             start_utc,
             end_utc,

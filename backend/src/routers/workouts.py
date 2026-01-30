@@ -4,7 +4,7 @@ from bson import ObjectId
 from fastapi import Query, Request, status, APIRouter, Depends
 from lib.database_lib import models 
 from lib.database_lib import auth_helper 
-from lib.database_lib import database 
+from lib.database_lib import workout_methods 
 from datetime import datetime, timezone
 from config import limiter
 from lib.misc.error_handler import APIError, ErrorMessage
@@ -32,15 +32,15 @@ async def CreateWorkout(
         workout_dict["scheduled_date"] = workout_dict["scheduled_date"].replace(tzinfo=timezone.utc)
 
     # I added this for some prevention of spamming workouts on a certain date.
-    num_on_date = database.GetNumberOfWorkoutsForUserOnDate(current_user.user_id, workout_dict["scheduled_date"])
+    num_on_date = workout_methods.GetNumberOfWorkoutsForUserOnDate(current_user.user_id, workout_dict["scheduled_date"])
     
     if num_on_date >= MAXIMUM_WORKOUTS_PER_DAY:
         raise APIError.validation_error(
             ErrorMessage.LIMIT_EXCEEDED.format(limit=f"Maximum of {MAXIMUM_WORKOUTS_PER_DAY} workouts per day")
         )
 
-    workout_id = database.CreateWorkout(workout_dict)
-    created_workout = database.GetWorkoutById(workout_id, current_user.user_id)
+    workout_id = workout_methods.CreateWorkout(workout_dict)
+    created_workout = workout_methods.GetWorkoutById(workout_id, current_user.user_id)
     
     if not created_workout:
         raise APIError.server_error(ErrorMessage.FAILED_TO_RETRIEVE)
@@ -65,12 +65,12 @@ async def UpdateWorkout(
         raise APIError.validation_error(ErrorMessage.NO_DATA_PROVIDED)
 
     updated_data["updated_at"] = datetime.now(timezone.utc)
-    success = database.UpdateWorkout(workout_id, current_user.user_id, updated_data)
+    success = workout_methods.UpdateWorkout(workout_id, current_user.user_id, updated_data)
     
     if not success:
         raise APIError.not_found(ErrorMessage.RESOURCE_NOT_OWNED)
 
-    updated_workout = database.GetWorkoutById(workout_id, current_user.user_id)
+    updated_workout = workout_methods.GetWorkoutById(workout_id, current_user.user_id)
 
     if not updated_workout:
         raise APIError.server_error(ErrorMessage.FAILED_TO_RETRIEVE)
@@ -88,7 +88,7 @@ async def delete_workout(
     if not ObjectId.is_valid(workout_id):
         raise APIError.validation_error(ErrorMessage.INVALID_ID)
 
-    success = database.DeleteWorkout(workout_id, current_user.user_id)
+    success = workout_methods.DeleteWorkout(workout_id, current_user.user_id)
 
     if not success:
         raise APIError.not_found(ErrorMessage.RESOURCE_NOT_OWNED)
@@ -106,7 +106,7 @@ async def list_workouts(
     limit: int = Query(50, le=100),
     skip: int = Query(0, ge=0),
 ):
-    workouts = database.GetWorkoutsForUser(
+    workouts = workout_methods.GetWorkoutsForUser(
         user_id=current_user.user_id,
         start_date=start_date,
         end_date=end_date,
@@ -127,7 +127,7 @@ async def GetWorkout(
     if not ObjectId.is_valid(workout_id):
         raise APIError.validation_error(ErrorMessage.INVALID_ID)
 
-    workout = database.GetWorkoutById(workout_id, current_user.user_id)
+    workout = workout_methods.GetWorkoutById(workout_id, current_user.user_id)
 
     if not workout:
         raise APIError.not_found(ErrorMessage.WORKOUT_NOT_FOUND)

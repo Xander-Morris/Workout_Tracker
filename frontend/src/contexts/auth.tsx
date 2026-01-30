@@ -1,7 +1,7 @@
 import { createContext, useState, useEffect, useContext, type ReactNode } from "react";
-import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useNavigate } from 'react-router-dom';
+import { apiClient, unauthenticatedClient } from "../lib/apiclient";
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -19,8 +19,6 @@ interface AuthContextType {
   setIsLoading: (loading: boolean) => void;
   isAuthenticated: () => boolean;
 }
-
-const base_url = import.meta.env.VITE_BACKEND_BASE_URL;
 
 const isAuthenticatedDefault = () => {
   const accessToken = localStorage.getItem("access_token");
@@ -99,11 +97,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       const email_or_username: string = formData["email_or_username"];
       const password: string = formData["password"];
-      const request_data = {email_or_username, password};
-      console.log(request_data);
-      const response = await axios.post(base_url + "/auth/login", request_data, {
-        withCredentials: true,  // Enable cookies
-      });
+      const request_data = { email_or_username, password };
+      const response = await unauthenticatedClient.post("/auth/login", request_data);
       const newAccessToken = response.data.access_token;
 
       setAccessToken(newAccessToken);
@@ -126,10 +121,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const email: string = formData["email"];
       const username: string = formData["username"];
       const password: string = formData["password"];
-      const request_data = {email, username, password};
-      const result = await axios.post(base_url + "/auth/signup", request_data, {
-        withCredentials: true,  // Enable cookies
-      });
+      const request_data = { email, username, password };
+      const result = await unauthenticatedClient.post("/auth/signup", request_data);
       const newAccessToken = result.data.access_token;
 
       setAccessToken(newAccessToken);
@@ -146,14 +139,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const logout = async () => {
     try {
-      if (accessToken) {
-        await axios.post(base_url + "/auth/logout", {}, {
-          headers: {
-            "Authorization": `Bearer ${accessToken}`
-          },
-          withCredentials: true  // Enable cookies for logout
-        });
-      }
+      await apiClient.post("/auth/logout");
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
@@ -186,18 +172,3 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 };
 
 export const useAuth = () => useContext(AuthContext);
-
-export const createAuthAxios = (token: string | null) => {
-  const authAxios = axios.create({
-    baseURL: base_url + "/api/",
-  });
-
-  authAxios.interceptors.request.use((config) => {
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  });
-
-  return authAxios;
-};

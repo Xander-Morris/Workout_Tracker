@@ -2,6 +2,13 @@ import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axio
 
 const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 
+// Unauthenticated client for auth endpoints (signup, login, etc)
+export const unauthenticatedClient: AxiosInstance = axios.create({
+    baseURL: API_BASE_URL,
+    withCredentials: true,
+});
+
+// Authenticated client for protected endpoints
 export const apiClient: AxiosInstance = axios.create({
     baseURL: API_BASE_URL,
     withCredentials: true,
@@ -49,15 +56,14 @@ apiClient.interceptors.response.use(
             isRefreshing = true;
 
             try {
-                const refreshResponse = await axios.post(
-                    `${API_BASE_URL}/auth/refresh`, 
-                    {}, 
-                    { withCredentials: true }
+                const refreshResponse = await unauthenticatedClient.post(
+                    "/auth/refresh",
+                    {}
                 );
 
                 const { access_token } = refreshResponse.data;
                 localStorage.setItem("access_token", access_token);
-                
+
                 isRefreshing = false;
                 onRefreshed(access_token);
                 originalRequest.headers.Authorization = `Bearer ${access_token}`;
@@ -66,7 +72,7 @@ apiClient.interceptors.response.use(
             } catch (refreshError) {
                 isRefreshing = false;
                 refreshSubscribers = [];
-                
+
                 localStorage.removeItem("access_token");
                 window.location.href = "/login";
 

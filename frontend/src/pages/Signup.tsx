@@ -50,10 +50,10 @@ const Signup: FC = () => {
         }
 
         if (errors[name]) {
-            setErrors(prev => ({
-                ...prev,
+            setErrors({
+                ...errors,
                 [name]: ''
-            }));
+            });
         }
     };
 

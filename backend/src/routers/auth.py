@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status, APIRouter, Depends, Request, Response
-import lib.database_lib.database as database
+import lib.database_lib.user_methods as user_methods
 import lib.database_lib.models as models
 import lib.database_lib.auth_helper as auth_helper
 import os
@@ -24,14 +24,14 @@ def ResponseSetCookieHelper(response: Response, refresh_token: str):
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
 @limiter.limit("5/minute")
 async def SignUp(request: Request, user: models.UserCreate, response: Response):
-    if database.DoesUserExist(user.email, user.username):
+    if user_methods.DoesUserExist(user.email, user.username):
         raise APIError.conflict(ErrorMessage.USER_ALREADY_EXISTS)
     
     if not auth_helper.IsPasswordStrong(user.password):
         raise APIError.validation_error(ErrorMessage.PASSWORD_WEAK)
 
     hashed_password = auth_helper.GetPasswordHash(user.password)
-    user_id = database.CreateUser(user.email, user.username, hashed_password)
+    user_id = user_methods.CreateUser(user.email, user.username, hashed_password)
     device_fingerprint = auth_helper.GenerateDeviceFingerprint(request)
     access_token, refresh_token = auth_helper.CreateTokenPair(user_id, user.email, 
                                                               username=user.username, device_fingerprint=device_fingerprint)
@@ -46,18 +46,18 @@ async def SignUp(request: Request, user: models.UserCreate, response: Response):
 @router.post("/login", status_code=status.HTTP_200_OK)
 @limiter.limit("5/minute")
 async def Login(request: Request, user: models.UserLogin, response: Response):
-    email = database.GetUserEmailByEmailOrUsername(user.email_or_username)
-    username = database.GetUsernameByEmail(email)
+    email = user_methods.GetUserEmailByEmailOrUsername(user.email_or_username)
+    username = user_methods.GetUsernameByEmail(email)
 
-    if not database.DoesUserExist(email, username):
+    if not user_methods.DoesUserExist(email, username):
         raise APIError.validation_error(ErrorMessage.INVALID_CREDENTIALS)
 
-    hashed_password = database.GetUserHashedPasswordInDB(email)
+    hashed_password = user_methods.GetUserHashedPasswordInDB(email)
 
     if not auth_helper.VerifyPassword(user.password, hashed_password):
         raise APIError.unauthorized(ErrorMessage.INVALID_CREDENTIALS)
     
-    user_id = database.GetUserIdByEmail(email)
+    user_id = user_methods.GetUserIdByEmail(email)
     device_fingerprint = auth_helper.GenerateDeviceFingerprint(request)
     access_token, refresh_token = auth_helper.CreateTokenPair(user_id, email, 
                                                               username=username, device_fingerprint=device_fingerprint)
@@ -93,7 +93,7 @@ async def Refresh(request: Request, response: Response):
 @router.post("/logout", status_code=status.HTTP_200_OK)
 @limiter.limit("5/minute")
 async def Logout(request: Request, response: Response, current_user: models.CurrentUser = Depends(auth_helper.GetCurrentUser)):
-    database.RevokeAllUserRefreshTokens(current_user.user_id)
+    user_methods.RevokeAllUserRefreshTokens(current_user.user_id)
     
     if response:
         response.delete_cookie(

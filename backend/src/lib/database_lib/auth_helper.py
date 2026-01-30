@@ -1,7 +1,7 @@
 from fastapi import HTTPException, status, Header, Request
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
-from . import database
+from . import user_methods
 from . import models
 import jwt 
 import datetime
@@ -66,7 +66,7 @@ def CreateTokenPair(user_id: str, email: str, username: str, device_fingerprint:
     raw_refresh_token, refresh_token_hash = CreateRefreshToken()
     
     expires_at = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=REFRESH_TOKEN_DAYS)
-    database.StoreRefreshToken(
+    user_methods.StoreRefreshToken(
         user_id, 
         refresh_token_hash, 
         expires_at, 
@@ -79,7 +79,7 @@ def CreateTokenPair(user_id: str, email: str, username: str, device_fingerprint:
 
 def ValidateRefreshTokenAndGetUser(raw_refresh_token: str, device_fingerprint: str) -> dict:
     token_hash = hashlib.sha256(raw_refresh_token.encode()).hexdigest()
-    result = database.GetRefreshTokenInfo(token_hash)
+    result = user_methods.GetRefreshTokenInfo(token_hash)
 
     if result is None:
         raise ValueError("Refresh token is invalid, expired, or revoked")
@@ -109,7 +109,7 @@ def RefreshAccessToken(raw_refresh_token: str, device_fingerprint: str) -> tuple
 
 def RevokeRefreshToken(raw_refresh_token: str) -> bool:
     token_hash = hashlib.sha256(raw_refresh_token.encode()).hexdigest()
-    return database.RevokeRefreshToken(token_hash)
+    return user_methods.RevokeRefreshToken(token_hash)
 
 async def GetCurrentUser(authorization : str = Header(...)) -> models.CurrentUser:    
     if not authorization.startswith("Bearer "):
@@ -141,7 +141,7 @@ async def GetCurrentUser(authorization : str = Header(...)) -> models.CurrentUse
             detail="Invalid token"
         )
     
-    if not database.DoesUserExist(email):
+    if not user_methods.DoesUserExist(email):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User no longer exists"
