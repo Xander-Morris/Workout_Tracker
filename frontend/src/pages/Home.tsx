@@ -2,7 +2,7 @@ import type { FC } from 'react'
 import { Link } from "react-router-dom";
 import { Navbar } from "../components/navbar.tsx";
 import '../index.css'
-import { ImageCarousel } from "../components/ImageCarousel";
+import { ImageCarousel } from "../components/image_carousel.tsx";
 
 const photos = [
   { src: "/Home/Creation.png" },

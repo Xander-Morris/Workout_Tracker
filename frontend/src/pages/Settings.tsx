@@ -2,6 +2,7 @@ import type { FC } from 'react'
 import { useEffect, useState } from 'react'
 import '../index.css'
 import { apiClient } from "../lib/apiclient";
+import { BackButton } from "../components/back_button";
 
 const Settings: FC = () => {
     const [bodyweightEnter, setBodyweightEnter] = useState('');
@@ -39,12 +40,12 @@ const Settings: FC = () => {
         setLoading(true);
         setMessage(null);
 
-        try {            
+        try {
             const response = await apiClient.post("/settings/bodyweight", {
                 bodyweight: parseFloat(bodyweightEnter),
             });
 
-            if (response.status == 201) {                
+            if (response.status == 201) {
                 if (!settings) { return; }
 
                 settings.bodyweight = response.data.bodyweight;
@@ -68,7 +69,12 @@ const Settings: FC = () => {
             <div className="min-h-screen bg-gradient-to-br from-slate-950 to-slate-900 flex items-center justify-center px-4 py-8">
                 <div className="max-w-md w-full">
                     <div className="bg-slate-900/80 backdrop-blur border border-white/10 rounded-2xl shadow-2xl p-8">
-                        <h1 className="text-2xl font-bold text-white mb-2 text-center">Settings</h1>
+                        <div className="relative mb-6">
+                            <div className="absolute left-0 top-0">
+                                <BackButton />
+                            </div>
+                            <h1 className="text-2xl font-bold text-white text-center">Settings</h1>
+                        </div>
                         <p className="text-gray-400 text-center mb-8">Manage your profile information</p>
 
                         <form onSubmit={handleSubmit} className="space-y-6">
