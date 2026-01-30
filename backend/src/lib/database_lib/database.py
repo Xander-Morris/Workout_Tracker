@@ -228,12 +228,13 @@ def GetAllWorkoutsInPeriod(user_id: str, start_date: datetime, end_date: datetim
     
     return results
 
-def StoreRefreshToken(user_id: str, token_hash: str, expires_at: datetime, email: str, device_fingerprint: Optional[str] = None, parent_token_id: Optional[str] = None) -> str:
+def StoreRefreshToken(user_id: str, token_hash: str, expires_at: datetime, email: str, username: str, device_fingerprint: Optional[str] = None, parent_token_id: Optional[str] = None) -> str:
     refresh_tokens = GetDb()["refresh_tokens"]
 
     result = refresh_tokens.insert_one({
         "user_id": user_id,
         "email": email,
+        "username": username,
         "token_hash": token_hash,
         "expires_at": expires_at,
         "created_at": datetime.now(timezone.utc),

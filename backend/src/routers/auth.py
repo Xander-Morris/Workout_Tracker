@@ -54,8 +54,6 @@ async def Login(request: Request, user: models.UserLogin, response: Response):
         raise HTTPException(status_code=400, detail="That email or username is not being used in any account.")
 
     hashed_password = database.GetUserHashedPasswordInDB(email)
-    print(user.password)
-    print(hashed_password)
 
     if not auth_helper.VerifyPassword(user.password, hashed_password):
         raise HTTPException(status_code=401, detail="You sent incorrect authentication details.")

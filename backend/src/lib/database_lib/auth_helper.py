@@ -71,6 +71,7 @@ def CreateTokenPair(user_id: str, email: str, username: str, device_fingerprint:
         refresh_token_hash, 
         expires_at, 
         email,
+        username=username,
         device_fingerprint=device_fingerprint,
     )
     
