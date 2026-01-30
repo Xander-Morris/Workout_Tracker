@@ -4,7 +4,7 @@ import lib.database_lib.models as models
 import lib.database_lib.auth_helper as auth_helper
 import os
 from config import limiter
-from lib.error_handler import APIError, ErrorMessage
+from lib.misc.error_handler import APIError, ErrorMessage
 
 router = APIRouter(tags=["auth"], prefix="/auth")
 REFRESH_TOKEN_DAYS = int(os.getenv("REFRESH_TOKEN_DAYS"))
@@ -25,10 +25,10 @@ def ResponseSetCookieHelper(response: Response, refresh_token: str):
 @limiter.limit("5/minute")
 async def SignUp(request: Request, user: models.UserCreate, response: Response):
     if database.DoesUserExist(user.email, user.username):
-        raise HTTPException(status_code=400, detail="Either your email or username is already being used.")
+        raise APIError.conflict(ErrorMessage.USER_ALREADY_EXISTS)
     
     if not auth_helper.IsPasswordStrong(user.password):
-        raise HTTPException(status_code=400, detail="Password does not meet strength requirements.")
+        raise APIError.validation_error(ErrorMessage.PASSWORD_WEAK)
 
     hashed_password = auth_helper.GetPasswordHash(user.password)
     user_id = database.CreateUser(user.email, user.username, hashed_password)
@@ -50,12 +50,12 @@ async def Login(request: Request, user: models.UserLogin, response: Response):
     username = database.GetUsernameByEmail(email)
 
     if not database.DoesUserExist(email, username):
-        raise HTTPException(status_code=400, detail="That email or username is not being used in any account.")
+        raise APIError.validation_error(ErrorMessage.INVALID_CREDENTIALS)
 
     hashed_password = database.GetUserHashedPasswordInDB(email)
 
     if not auth_helper.VerifyPassword(user.password, hashed_password):
-        raise HTTPException(status_code=401, detail="You sent incorrect authentication details.")
+        raise APIError.unauthorized(ErrorMessage.INVALID_CREDENTIALS)
     
     user_id = database.GetUserIdByEmail(email)
     device_fingerprint = auth_helper.GenerateDeviceFingerprint(request)
@@ -75,10 +75,7 @@ async def Refresh(request: Request, response: Response):
     refresh_token = request.cookies.get("refresh_token")
 
     if not refresh_token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Refresh token not found"
-        )
+        raise APIError.unauthorized(ErrorMessage.REFRESH_TOKEN_MISSING)
     
     try:
         device_fingerprint = auth_helper.GenerateDeviceFingerprint(request)
@@ -91,10 +88,7 @@ async def Refresh(request: Request, response: Response):
             token_type="bearer"
         )
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(e)
-        )
+        raise APIError.unauthorized(ErrorMessage.INVALID_TOKEN)
 
 @router.post("/logout", status_code=status.HTTP_200_OK)
 @limiter.limit("5/minute")

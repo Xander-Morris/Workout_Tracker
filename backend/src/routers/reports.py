@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, Request
 import lib.database_lib.database as database
 import lib.database_lib.models as models
 import lib.database_lib.auth_helper as auth_helper
 from config import limiter
 from lib.misc import dates
+from lib.misc.error_handler import APIError, ErrorMessage
 
 router = APIRouter(tags=["reports"], prefix="/reports")
 
@@ -30,15 +31,12 @@ async def GetReport(
     exercise = payload.exercise.strip()
 
     if not exercise.strip():
-        raise HTTPException(
-            status_code=400,
-            detail="Exercise name cannot be empty"
-        )
+        raise APIError.validation_error(ErrorMessage.EMPTY_INPUT)
 
     workouts = database.GetWorkoutsThatContainExercise(current_user.user_id, exercise)
 
     if not workouts or len(workouts) <= 0:
-        raise HTTPException(status_code=404, detail="Workouts not found")
+        raise APIError.not_found("Workouts")
     
     return models.WorkoutsThatContainExerciseReport(
         exercise=exercise,
@@ -55,10 +53,7 @@ async def GetVolumeOverPeriodReport(
 ):  
     # The start date can either be the same as the end date, or before it.
     if payload.start_date > payload.end_date:
-        raise HTTPException(
-            status_code=400,
-            detail="The start date must be equal to or before the end date!"
-        )
+        raise APIError.validation_error("The start date must be equal to or before the end date")
     
     exercise = payload.exercise.strip() if payload.exercise else ""
     start_utc, end_utc = dates.LocalDateRangeToUTC(

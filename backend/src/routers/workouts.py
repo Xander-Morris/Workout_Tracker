@@ -1,12 +1,13 @@
 import os
 from typing import List, Optional
 from bson import ObjectId
-from fastapi import Query, Request, status, APIRouter, Depends, HTTPException
+from fastapi import Query, Request, status, APIRouter, Depends
 from lib.database_lib import models 
 from lib.database_lib import auth_helper 
 from lib.database_lib import database 
 from datetime import datetime, timezone
 from config import limiter
+from lib.misc.error_handler import APIError, ErrorMessage
 
 router = APIRouter(tags=["workouts"], prefix="/workouts")
 MAXIMUM_WORKOUTS_PER_DAY = os.getenv("MAXIMUM_WORKOUTS_PER_DAY", 5)
@@ -34,13 +35,15 @@ async def CreateWorkout(
     num_on_date = database.GetNumberOfWorkoutsForUserOnDate(current_user.user_id, workout_dict["scheduled_date"])
     
     if num_on_date >= MAXIMUM_WORKOUTS_PER_DAY:
-        raise HTTPException(status_code=400, detail=f"Maximum of {MAXIMUM_WORKOUTS_PER_DAY} workouts per day exceeded.")
+        raise APIError.validation_error(
+            ErrorMessage.LIMIT_EXCEEDED.format(limit=f"Maximum of {MAXIMUM_WORKOUTS_PER_DAY} workouts per day")
+        )
 
     workout_id = database.CreateWorkout(workout_dict)
     created_workout = database.GetWorkoutById(workout_id, current_user.user_id)
     
     if not created_workout:
-        raise HTTPException(status_code=500, detail="Failed to retrieve created workout")
+        raise APIError.server_error(ErrorMessage.FAILED_TO_RETRIEVE)
 
     return models.WorkoutResponse(**created_workout)
 
@@ -54,23 +57,23 @@ async def UpdateWorkout(
     current_user = Depends(auth_helper.GetCurrentUser)
 ):
     if not ObjectId.is_valid(workout_id):
-        raise HTTPException(status_code=400, detail="Invalid workout ID")
+        raise APIError.validation_error(ErrorMessage.INVALID_ID)
 
     updated_data = workout_update.model_dump(exclude_unset=True, exclude_none=True)
 
     if not updated_data:
-        raise HTTPException(status_code=400, detail="No data provided to update")
+        raise APIError.validation_error(ErrorMessage.NO_DATA_PROVIDED)
 
     updated_data["updated_at"] = datetime.now(timezone.utc)
     success = database.UpdateWorkout(workout_id, current_user.user_id, updated_data)
     
     if not success:
-        raise HTTPException(status_code=404, detail="Workout not found or not owned by user")
+        raise APIError.not_found(ErrorMessage.RESOURCE_NOT_OWNED)
 
     updated_workout = database.GetWorkoutById(workout_id, current_user.user_id)
 
     if not updated_workout:
-        raise HTTPException(status_code=500, detail="Failed to retrieve updated workout")
+        raise APIError.server_error(ErrorMessage.FAILED_TO_RETRIEVE)
 
     return models.WorkoutResponse(**updated_workout)
 
@@ -83,12 +86,12 @@ async def delete_workout(
     current_user = Depends(auth_helper.GetCurrentUser)
 ):
     if not ObjectId.is_valid(workout_id):
-        raise HTTPException(status_code=400, detail="Invalid workout ID")
+        raise APIError.validation_error(ErrorMessage.INVALID_ID)
 
     success = database.DeleteWorkout(workout_id, current_user.user_id)
 
     if not success:
-        raise HTTPException(status_code=404, detail="Workout not found or not owned by user")
+        raise APIError.not_found(ErrorMessage.RESOURCE_NOT_OWNED)
     
     return None
 
@@ -122,11 +125,11 @@ async def GetWorkout(
     current_user = Depends(auth_helper.GetCurrentUser)
 ):
     if not ObjectId.is_valid(workout_id):
-        raise HTTPException(status_code=400, detail="Invalid workout ID")
+        raise APIError.validation_error(ErrorMessage.INVALID_ID)
 
     workout = database.GetWorkoutById(workout_id, current_user.user_id)
 
     if not workout:
-        raise HTTPException(status_code=404, detail="Workout not found")
+        raise APIError.not_found(ErrorMessage.WORKOUT_NOT_FOUND)
     
     return models.WorkoutResponse(**workout)
