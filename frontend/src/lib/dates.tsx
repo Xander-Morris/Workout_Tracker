@@ -28,15 +28,23 @@ export const DatesLibrary = {
         return isNaN(dateObj.getTime()); 
     },
 
-    formatDateToLocaleDateString: (dateInput: string): string => {
-        return new Date(dateInput).toLocaleDateString('en-US', {
-            weekday: 'short',
+    formatDateToLocaleDateString: (dateInput: string, noHoursAndMinutes: boolean = false, noWeekday: boolean = false): string => {
+        let dateFormatOptions: Intl.DateTimeFormatOptions = {
             year: 'numeric',
             month: 'short',
             day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        };
+
+        if (!noHoursAndMinutes) {
+            dateFormatOptions.hour = '2-digit';
+            dateFormatOptions.minute = '2-digit';
+        }
+
+        if (!noWeekday) {
+            dateFormatOptions.weekday = 'short';
+        }
+
+        return new Date(dateInput).toLocaleDateString('en-US', dateFormatOptions);
     },
 
     getFirstDayOfMonth: (date: Date): number => {

@@ -10,7 +10,7 @@ from config import limiter
 from lib.misc.error_handler import APIError, ErrorMessage
 
 router = APIRouter(tags=["workouts"], prefix="/workouts")
-MAXIMUM_WORKOUTS_PER_DAY = os.getenv("MAXIMUM_WORKOUTS_PER_DAY", 5)
+MAXIMUM_WORKOUTS_PER_DAY = int(os.getenv("MAXIMUM_WORKOUTS_PER_DAY", 5))
 
 # CREATE
 @router.post("/", response_model=models.WorkoutResponse, status_code=status.HTTP_201_CREATED)

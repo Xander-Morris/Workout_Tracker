@@ -74,5 +74,6 @@ class VolumeOverPeriodRequest(BaseModel):
     exercise: str | None = None
 
 class VolumeOverPeriodReport(BaseModel):
-    total_volume: float # It's a float since the weight can be a float.
+    total_volume: float = 0 # It's a float since the weight can be a float.
+    volume_per_day: Optional[dict[AwareDatetime, int]] = None
     exercise: str # None gets converted to ""

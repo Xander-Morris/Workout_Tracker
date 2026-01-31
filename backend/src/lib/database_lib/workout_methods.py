@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from bson import ObjectId
+import pymongo
 from pymongo.results import InsertOneResult
 from typing import Dict, List, Optional
 from .database_config import GetDb, MakeDatetimeAware
@@ -95,16 +96,17 @@ def GetAllExercisesForUser(user_id: str) -> List[str]:
     
     return exercises
 
-def GetWorkoutsThatContainExercise(user_id: str, exercise_name: str, start_date: datetime | None = None, end_date: datetime | None = None) -> List[Dict]:
+def GetWorkoutsThatContainExercise(user_id: str, exercise_name: str, start_date: datetime | None = None, end_date: datetime | None = None, ascending_sort: bool = False) -> List[Dict]:
     results = []
     workouts = GetDb()["workouts"]
     cursor = None
+    sort_option = pymongo.ASCENDING if ascending_sort else pymongo.DESCENDING
 
     if not start_date or not end_date:
         cursor = workouts.find({
             "user_id": user_id,
             "exercises.name": exercise_name,
-        }).sort("scheduled_date", -1)
+        }).sort("scheduled_date", sort_option)
     else:
         cursor = workouts.find({
             "user_id": user_id,
@@ -113,7 +115,7 @@ def GetWorkoutsThatContainExercise(user_id: str, exercise_name: str, start_date:
                 "$gte": start_date,
                 "$lte": end_date
             },
-        }).sort("scheduled_date", -1)
+        }).sort("scheduled_date", sort_option)
     
     for workout in cursor:
         workout = MakeDatetimeAware(workout)
@@ -122,15 +124,16 @@ def GetWorkoutsThatContainExercise(user_id: str, exercise_name: str, start_date:
     
     return results
 
-def GetAllWorkoutsInPeriod(user_id: str, start_date: datetime, end_date: datetime) -> List[Dict]:
+def GetAllWorkoutsInPeriod(user_id: str, start_date: datetime, end_date: datetime, ascending_sort: bool = False) -> List[Dict]:
     workouts = GetDb()["workouts"]
+    sort_option = pymongo.ASCENDING if ascending_sort else pymongo.DESCENDING
     cursor = workouts.find({
         "user_id": user_id,
         "scheduled_date": {
             "$gte": start_date,
             "$lte": end_date
         }
-    }).sort("scheduled_date", -1)
+    }).sort("scheduled_date", sort_option)
 
     results = []
 

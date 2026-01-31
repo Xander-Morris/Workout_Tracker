@@ -7,10 +7,12 @@ import { Notifications } from '../lib/notifications';
 import { ListedWorkout } from "../components/listed_workout";
 import { CalendarPicker } from "../components/calendar_picker";
 import { DatesLibrary } from "../lib/dates";
+import { Line, LineChart, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 
 const Reports: FC = () => {
     type STATUS_TYPE = "none" | "loading" | "error" | "success";
     type REPORT_TYPE_OPEN = "contains" | "volume" | "1rm";
+    const defaultGraphData: [{ name: string, amount: number, }] = [{ name: "", amount: 0 },];
 
     const [reportType, setReportType] = useState<REPORT_TYPE_OPEN>("contains");
     const [dropdownVisible, setDropdownVisible] = useState<boolean>(false);
@@ -23,8 +25,9 @@ const Reports: FC = () => {
     const [volumeReportTotal, setVolumeReportTotal] = useState<number | null>(null);
     const [volumeReportExercise, setVolumeReportExercise] = useState<string | null>(null);
     const [expandedId, setExpandedId] = useState<string | null>(null);
-    const [showStartDatePicker, setShowStartDatePicker] = useState(false);
-    const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+    const [showStartDatePicker, setShowStartDatePicker] = useState<boolean>(false);
+    const [showEndDatePicker, setShowEndDatePicker] = useState<boolean>(false);
+    const [graphData, setGraphData] = useState<[{ name: string, amount: number, }]>(defaultGraphData);
 
     const setReportTypeToContains = () => setReportType("contains");
     const setReportTypeToVolume = () => setReportType("volume");
@@ -87,9 +90,10 @@ const Reports: FC = () => {
         setEndDate(null);
         setVolumeReportTotal(null);
         setVolumeReportExercise(null);
+        setGraphData(defaultGraphData);
     }, [reportType]);
 
-    const handleDateSelect = (start_or_end : "start" | "end", date: Date) => {
+    const handleDateSelect = (start_or_end: "start" | "end", date: Date) => {
         const year = date.getFullYear();
         const month = date.getMonth();
         const day = date.getDate();
@@ -148,9 +152,26 @@ const Reports: FC = () => {
         }).then(response => {
             setVolumeReportTotal(response.data.total_volume);
             setVolumeReportExercise(response.data.exercise || null);
+            const volume_per_day = response.data.volume_per_day;
+            let new_graph_data: [{ name: string, amount: number }] = [];
+
+            for (let day in volume_per_day) {
+                const volume: number = volume_per_day[day];
+                day = DatesLibrary.formatDateToLocaleDateString(day, true, true);
+                new_graph_data.push({ name: day, amount: volume });
+            }
+
+            console.log(new_graph_data);
+
+            setGraphData(new_graph_data);
         }).catch(error => {
             Notifications.showError(error);
         });
+    };
+
+    const calculateChartHeight = (dataLength: number) => {
+        // Base height: 320px, add 15px for each data point to accommodate rotated labels
+        return Math.max(320, 320 + (dataLength - 1) * 15);
     };
 
     const createReportTypeButton = (reportTypeForButton: REPORT_TYPE_OPEN, text: string, setReportType: () => void) => {
@@ -287,6 +308,13 @@ const Reports: FC = () => {
                                         <h2 className="text-xl font-semibold text-gray-600">
                                             Total volume {volumeReportExercise ? `for ${volumeReportExercise}` : "for all exercises"}: {volumeReportTotal.toLocaleString()} lbs
                                         </h2>
+                                        <ResponsiveContainer width="100%" height={calculateChartHeight(graphData.length)}>
+                                            <LineChart data={graphData} margin={{ top: 20, right: 20, left: 0, bottom: 70 }}>
+                                                <XAxis dataKey="name" interval={0} height={60} tick={{ angle: -45, textAnchor: 'end' }} />
+                                                <YAxis width={60} />
+                                                <Line type="monotone" dataKey="amount" stroke="#8884d8" />
+                                            </LineChart>
+                                        </ResponsiveContainer>
                                     </div>
                                 )}
                             </div>

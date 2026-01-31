@@ -64,9 +64,12 @@ async def GetVolumeOverPeriodReport(
     total_volume = 0
 
     # I might default to using the user's bodyweight later as a fallback.
-    def AddToTotalVolume(ex):
+    def AddToTotalVolume(ex) -> int:
         nonlocal total_volume
-        total_volume += ex["sets"] * ex["reps"] * (ex.get("weight") or 0)
+        contribution = ex["sets"] * ex["reps"] * (ex.get("weight") or 0)
+        total_volume += contribution
+
+        return contribution
 
     if exercise:
         workouts = workout_methods.GetWorkoutsThatContainExercise(
@@ -74,12 +77,14 @@ async def GetVolumeOverPeriodReport(
             exercise,
             start_utc,
             end_utc,
+            True
         )
     else:
         workouts = workout_methods.GetAllWorkoutsInPeriod(
             current_user.user_id,
             start_utc,
             end_utc,
+            True
         )
 
     if not workouts:
@@ -87,13 +92,22 @@ async def GetVolumeOverPeriodReport(
             total_volume=0,
             exercise=exercise,
         )
+    
+    volume_per_day = {}
 
     for workout in workouts:
+        volume = 0
+
         for ex in workout["exercises"]:
             if not exercise or ex["name"].lower() == exercise.lower():
-                AddToTotalVolume(ex)
+                contribution = AddToTotalVolume(ex)
+                volume += contribution
+
+        if volume > 0:
+            volume_per_day[workout["scheduled_date"]] = volume
 
     return models.VolumeOverPeriodReport(
         total_volume=total_volume,
+        volume_per_day=volume_per_day,
         exercise=exercise,
     )
