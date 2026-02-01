@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Navbar } from "../components/navbar.tsx";
 import '../index.css'
 import { ImageCarousel } from "../components/image_carousel.tsx";
+import { useAuth } from '../contexts/auth'
 
 const photos = [
   { src: "/Home/Creation.png" },
@@ -11,6 +12,8 @@ const photos = [
 ];
 
 const Home: FC = () => {
+    const { user } = useAuth();
+
     return (
         <div className="background-primary">
             <Navbar></Navbar>
@@ -32,6 +35,7 @@ const Home: FC = () => {
                                 Log workouts, visualize progress, and build consistency with a fast, no-nonsense tracking system.
                             </p>
 
+                            {(!user || Object.keys(user).length == 0) ? <>
                             <div className="mt-10 flex gap-4">
                                 <Link to="/signup">
                                 <label className="px-6 py-3 rounded-full bg-indigo-500 text-white font-medium hover:bg-indigo-400 transition">
@@ -39,6 +43,7 @@ const Home: FC = () => {
                                 </label>
                                 </Link>
                             </div>
+                            </> : <></>}
                         </div>
                     </div>
                 </section>
@@ -48,7 +53,7 @@ const Home: FC = () => {
                         {[
                             ['Log workouts', 'Fast input for sets, reps, and weights.'],
                             ['See progress', 'Visualize strength gains over time.'],
-                            ['Reuse routines', 'Put in workouts to repeat.'],
+                            ['Create reports', 'Use reports to see your progress.'],
                         ].map(([title, desc]) => (
                             <div
                                 key={title}

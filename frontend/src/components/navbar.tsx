@@ -24,6 +24,15 @@ export const Navbar = () => {
         }
     }, [dropdownOpen]);
 
+    const getNavButtonClass = (path: string) => {
+        const isActive = pathname === path;
+        const baseClass = "px-4 py-2 rounded-lg text-sm font-medium transition-all";
+        const inactiveClass = "text-white hover:bg-white/10 active:bg-white/20";
+        const activeClass = "text-indigo-300 bg-white/10 border-b-2 border-indigo-400 shadow-lg shadow-indigo-500/20";
+        
+        return `${baseClass} ${isActive ? activeClass : inactiveClass}`;
+    };
+
     return <>
         <header className="sticky top-0 z-20 bg-slate-950/80 backdrop-blur border-b border-white/10">
             <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -33,33 +42,21 @@ export const Navbar = () => {
 
                 <nav className="flex justify-end items-center gap-2">
                     {(user && Object.keys(user).length != 0) ? <>
-                        {(pathname != "/") ? <>
-                            <Link to="/">
-                                <button
-                                    className="text-white px-4 py-2 rounded-lg text-sm font-medium transition-all hover:bg-white/10 active:bg-white/20"
-                                >
-                                    Home
-                                </button>
-                            </Link>
-                        </> : <></>}
-                        {(pathname != "/workouts") ? <>
-                            <Link to="/workouts">
-                                <button
-                                    className="text-white px-4 py-2 rounded-lg text-sm font-medium transition-all hover:bg-white/10 active:bg-white/20"
-                                >
-                                    Workouts
-                                </button>
-                            </Link>
-                        </> : <></>}
-                        {(pathname != "/reports") ? <>
-                            <Link to="/reports">
-                                <button
-                                    className="text-white px-4 py-2 rounded-lg text-sm font-medium transition-all hover:bg-white/10 active:bg-white/20"
-                                >
-                                    Reports
-                                </button>
-                            </Link>
-                        </> : <></>}
+                        <Link to="/">
+                            <button className={getNavButtonClass("/")}>
+                                Home
+                            </button>
+                        </Link>
+                        <Link to="/workouts">
+                            <button className={getNavButtonClass("/workouts")}>
+                                Workouts
+                            </button>
+                        </Link>
+                        <Link to="/reports">
+                            <button className={getNavButtonClass("/reports")}>
+                                Reports
+                            </button>
+                        </Link>
                         <div className="relative" ref={dropdownRef}>
                             <div className="flex items-center gap-2">
                                 <label className="px-3 text-center text-sm font-medium">{user.username}</label>
@@ -104,7 +101,6 @@ export const Navbar = () => {
                             )}
                         </div>
                     </>
-
                         // For if the user is not logged in.
                         : <><Link
                             to="/login"
@@ -116,7 +112,8 @@ export const Navbar = () => {
                                 <button className="text-white px-4 py-2 rounded-lg bg-indigo-600 font-medium hover:bg-indigo-500 active:bg-indigo-700 transition-all">
                                     Sign Up
                                 </button>
-                            </Link></>}
+                            </Link>
+                        </>}
                 </nav>
             </div>
         </header>
