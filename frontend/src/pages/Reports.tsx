@@ -139,14 +139,14 @@ const Reports: FC = () => {
     };
 
     const generateVolumeOr1RMReport = (isVolume: boolean) => {
-        if (!areDatesValid()) { 
+        if (!areDatesValid()) {
             Notifications.showError("Please select a start and end date!");
-            return; 
+            return;
         }
 
         if (!isVolume && (selectedExercise == null || selectedExercise == "")) {
             Notifications.showError("Please select an exercise for the 1RM report!");
-            return; 
+            return;
         }
 
         const endpoint: string = isVolume ? "/reports/volume" : "/reports/onerepmax";
@@ -197,10 +197,14 @@ const Reports: FC = () => {
     };
 
     const createReportTypeButton = (reportTypeForButton: REPORT_TYPE_OPEN, text: string, setReportType: () => void) => {
+        const isActive = reportType === reportTypeForButton;
         return (
             <button
                 onClick={setReportType}
-                className={reportType == reportTypeForButton ? "mr-12 w-30 rounded-lg bg-blue-400 px-4 py-2 text-white" : "mr-12 w-30 rounded-lg bg-gray-400 px-4 py-2 text-white"}
+                className={`px-6 py-3 font-semibold text-sm transition-all duration-300 border-b-2 ${isActive
+                        ? "text-blue-600 border-blue-600 bg-blue-50"
+                        : "text-gray-600 border-transparent hover:text-gray-900 hover:bg-gray-50"
+                    }`}
             >
                 {text}
             </button>
@@ -257,10 +261,14 @@ const Reports: FC = () => {
         <div className="background-primary min-h-screen">
             <Navbar />
             {/* Selection for different types of reports */}
-            <div className="pt-4 flex min-h-10 items-center justify-center">
-                {createReportTypeButton("contains", "Contains", setReportTypeToContains)}
-                {createReportTypeButton("volume", "Volume", setReportTypeToVolume)}
-                {createReportTypeButton("1rm", "1RM", setReportTypeTo1RM)}
+            <div className="border-b border-gray-200 bg-white shadow-sm">
+                <div className="flex justify-center">
+                    <div className="flex space-x-8">
+                        {createReportTypeButton("contains", "Contains", setReportTypeToContains)}
+                        {createReportTypeButton("volume", "Volume", setReportTypeToVolume)}
+                        {createReportTypeButton("1rm", "1RM", setReportTypeTo1RM)}
+                    </div>
+                </div>
             </div>
 
             {exercises.length === 0 ? (

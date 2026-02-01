@@ -31,12 +31,12 @@ export const Navbar = () => {
                     Workout Tracker
                 </span>
 
-                <nav className="flex justify-end items-center gap-4">
+                <nav className="flex justify-end items-center gap-1">
                     {(user && Object.keys(user).length != 0) ? <>
                         {(pathname != "/") ? <>
                             <Link to="/">
                                 <button
-                                    className="text-white-900 bg-blue-400 hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                                    className="text-white px-4 py-2 rounded-lg text-sm font-medium transition-all hover:bg-white/10 active:bg-white/20"
                                 >
                                     Home
                                 </button>
@@ -45,7 +45,7 @@ export const Navbar = () => {
                         {(pathname != "/workouts") ? <>
                             <Link to="/workouts">
                                 <button
-                                    className="text-white-900 bg-blue-400 hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                                    className="text-white px-4 py-2 rounded-lg text-sm font-medium transition-all hover:bg-white/10 active:bg-white/20"
                                 >
                                     Workouts
                                 </button>
@@ -54,7 +54,7 @@ export const Navbar = () => {
                         {(pathname != "/reports") ? <>
                             <Link to="/reports">
                                 <button
-                                    className="text-white-900 bg-blue-400 hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                                    className="text-white px-4 py-2 rounded-lg text-sm font-medium transition-all hover:bg-white/10 active:bg-white/20"
                                 >
                                     Reports
                                 </button>
