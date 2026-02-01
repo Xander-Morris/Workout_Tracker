@@ -17,6 +17,11 @@ export const Notifications = {
             errorMessage = error;
         }
 
+        // I don't want to display error messages about tokens.
+        if (errorMessage.toLowerCase().includes("token")) {
+            return;
+        }
+
         toast.error(errorMessage);
     },
 };
