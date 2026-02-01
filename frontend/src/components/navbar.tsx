@@ -29,7 +29,7 @@ export const Navbar = () => {
         const baseClass = "px-4 py-2 rounded-lg text-sm font-medium transition-all";
         const inactiveClass = "text-white hover:bg-white/10 active:bg-white/20";
         const activeClass = "text-indigo-300 bg-white/10 border-b-2 border-indigo-400 shadow-lg shadow-indigo-500/20";
-        
+
         return `${baseClass} ${isActive ? activeClass : inactiveClass}`;
     };
 
@@ -59,17 +59,17 @@ export const Navbar = () => {
                         </Link>
                         <div className="relative" ref={dropdownRef}>
                             <div className="flex items-center gap-2">
-                                <label className="px-3 text-center text-sm font-medium">{user.username}</label>
+                                <label className="px-3 text-center text-sm font-medium text-white">{user.username}</label>
                                 <button
                                     onClick={() => setDropdownOpen(!dropdownOpen)}
-                                    className="w-9 h-9 bg-blue-400 hover:bg-blue-500 text-white font-bold rounded-lg shadow-lg transition-colors flex items-center justify-center"
+                                    className="w-9 h-9 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all flex items-center justify-center border border-white/20"
                                 >
                                     <img
                                         style={{
                                             transform: `translateY(${dropdownOpen ? -2 : 2}px) rotate(${dropdownOpen ? 180 : 0}deg)`,
                                             transition: 'transform 300ms ease-in-out'
                                         }}
-                                        className="w-6 h-6"
+                                        className="w-5 h-5"
                                         src="/navbar/arrow.png"
                                         alt="Profile"
                                     ></img>
@@ -82,7 +82,7 @@ export const Navbar = () => {
                                     <Link to="/settings">
                                         <button
                                             onClick={() => setDropdownOpen(false)}
-                                            className="w-full text-left px-4 py-2 hover:bg-blue-500/20 transition-colors text-white flex items-center gap-2"
+                                            className="w-full text-left px-4 py-2 hover:bg-indigo-500/20 transition-colors text-white flex items-center gap-2"
                                         >
                                             <span>⚙️</span>
                                             <span>Settings</span>
@@ -91,7 +91,7 @@ export const Navbar = () => {
                                     <div>
                                         <button
                                             onClick={logout}
-                                            className="w-full text-left px-4 py-2 hover:bg-blue-500/20 transition-colors text-white flex items-center gap-2"
+                                            className="w-full text-left px-4 py-2 hover:bg-indigo-500/20 transition-colors text-white flex items-center gap-2"
                                         >
                                             <span>👤</span>
                                             <span>Logout</span>
