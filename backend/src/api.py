@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
 from fastapi.responses import JSONResponse
-from routers import (auth, workouts, reports, settings,)
+from routers import auth, workouts, reports, settings
 from config import limiter
 
 app = FastAPI(title="Workout Tracker",)
@@ -24,9 +24,9 @@ origins = [
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=True, 
-    allow_methods=["GET", "POST", "PUT", "DELETE"],  
-    allow_headers=["Content-Type", "Authorization"],  
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 app.include_router(auth.router)

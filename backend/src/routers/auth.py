@@ -94,13 +94,12 @@ async def Refresh(request: Request, response: Response):
 @limiter.limit("5/minute")
 async def Logout(request: Request, response: Response, current_user: models.CurrentUser = Depends(auth_helper.GetCurrentUser)):
     user_methods.RevokeAllUserRefreshTokens(current_user.user_id)
-    
-    if response:
-        response.delete_cookie(
-            key="refresh_token",
-            httponly=True,
-            secure=os.getenv("ENVIRONMENT") == "production",
-            samesite="lax"
-        )
+
+    response.delete_cookie(
+        key="refresh_token",
+        httponly=True,
+        secure=os.getenv("ENVIRONMENT") == "production",
+        samesite="lax"
+    )
 
     return {"message": "Logged out successfully"}

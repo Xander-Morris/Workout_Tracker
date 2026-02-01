@@ -47,8 +47,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const navigate = useNavigate();
 
   const isAuthenticated = () => {
-    const token = localStorage.getItem("access_token");
-    return !!token;
+    return !!localStorage.getItem("access_token");
   };
 
   const parseJwt = (token: string): any => {

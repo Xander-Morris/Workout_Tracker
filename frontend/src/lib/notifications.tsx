@@ -4,18 +4,17 @@ const DEFAULT_ERROR_MESSAGE = 'An error occurred';
 
 export const Notifications = {
     showError: (error: any) => {
-        let errorMessage = 
-        error.response?.data?.detail 
-        || error.message 
-        || (typeof(error) == "string" && error) 
-        || DEFAULT_ERROR_MESSAGE;
+        const detail = error?.response?.data?.detail;
+        let errorMessage = DEFAULT_ERROR_MESSAGE;
 
-        if (error.response?.data?.detail[0]) {
-            errorMessage = error.response.data.detail[0].msg;
-        }
-
-        if (typeof(errorMessage) !== "string") {
-            errorMessage = DEFAULT_ERROR_MESSAGE;
+        if (typeof detail === 'string') {
+            errorMessage = detail;
+        } else if (Array.isArray(detail) && detail[0]?.msg) {
+            errorMessage = detail[0].msg;
+        } else if (typeof error?.message === 'string') {
+            errorMessage = error.message;
+        } else if (typeof error === 'string') {
+            errorMessage = error;
         }
 
         toast.error(errorMessage);

@@ -6,9 +6,9 @@ import { ImageCarousel } from "../components/image_carousel.tsx";
 import { useAuth } from '../contexts/auth'
 
 const photos = [
-  { src: "/Home/Creation.png" },
-  { src: "/Home/VolumeReport.png" },
-  { src: "/Home/Workouts.png" },
+    { src: "/Home/Creation.png" },
+    { src: "/Home/VolumeReport.png" },
+    { src: "/Home/Workouts.png" },
 ];
 
 const Home: FC = () => {
@@ -35,15 +35,15 @@ const Home: FC = () => {
                                 Log workouts, visualize progress, and build consistency with a fast, no-nonsense tracking system.
                             </p>
 
-                            {(!user || Object.keys(user).length == 0) ? <>
-                            <div className="mt-10 flex gap-4">
-                                <Link to="/signup">
-                                <label className="px-6 py-3 rounded-full bg-indigo-500 text-white font-medium hover:bg-indigo-400 transition">
-                                    Get started free
-                                </label>
-                                </Link>
-                            </div>
-                            </> : <></>}
+                            {(!user || Object.keys(user).length === 0) && (
+                                <div className="mt-10 flex gap-4">
+                                    <Link to="/signup">
+                                        <button className="px-6 py-3 rounded-full bg-indigo-500 text-white font-medium hover:bg-indigo-400 transition">
+                                            Get started free
+                                        </button>
+                                    </Link>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </section>

@@ -1,5 +1,6 @@
 import type { FC } from "react";
 import { useEffect, useState } from "react";
+import { isEqual } from "lodash";
 import { apiClient } from "../lib/apiclient";
 import { Navbar } from "../components/navbar";
 import { ExerciseDropdown } from "../components/exercise_dropdown";
@@ -8,7 +9,6 @@ import { CalendarPicker } from "../components/calendar_picker";
 import { DatesLibrary } from "../lib/dates";
 import { Line, LineChart, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 import { Notifications } from "../lib/notifications";
-import * as lodash from 'lodash';
 
 const Reports: FC = () => {
     type STATUS_TYPE = "none" | "loading" | "error" | "success";
@@ -16,7 +16,7 @@ const Reports: FC = () => {
     const defaultGraphData: [{ name: string, amount: number, }] = [{ name: "", amount: 0 },];
 
     const [reportType, setReportType] = useState<REPORT_TYPE_OPEN>("contains");
-    const [dropdownVisible, setDropdownVisible] = useState<boolean>(false);
+    const [dropdownVisible, setDropdownVisible] = useState(false);
     const [exercises, setExercises] = useState<string[]>([]);
     const [selectedExercise, setSelectedExercise] = useState("");
     const [status, setStatus] = useState<STATUS_TYPE>("none");
@@ -25,10 +25,10 @@ const Reports: FC = () => {
     const [endDate, setEndDate] = useState<Date | null>(null);
     const [volumeReportTotal, setVolumeReportTotal] = useState<number | null>(null);
     const [volumeReportExercise, setVolumeReportExercise] = useState<string | null>(null);
-    const [oneRepMaxExercise, setOneRepMaxExercise] = useState<string>("");
+    const [oneRepMaxExercise, setOneRepMaxExercise] = useState("");
     const [expandedId, setExpandedId] = useState<string | null>(null);
-    const [showStartDatePicker, setShowStartDatePicker] = useState<boolean>(false);
-    const [showEndDatePicker, setShowEndDatePicker] = useState<boolean>(false);
+    const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+    const [showEndDatePicker, setShowEndDatePicker] = useState(false);
     const [graphData, setGraphData] = useState<[{ name: string, amount: number, }]>(defaultGraphData);
 
     const setReportTypeToContains = () => setReportType("contains");
@@ -202,8 +202,8 @@ const Reports: FC = () => {
             <button
                 onClick={setReportType}
                 className={`px-6 py-3 font-semibold text-sm transition-all duration-300 border-b-2 ${isActive
-                        ? "text-blue-600 border-blue-600 bg-blue-50"
-                        : "text-gray-600 border-transparent hover:text-gray-900 hover:bg-gray-50"
+                    ? "text-blue-600 border-blue-600 bg-blue-50"
+                    : "text-gray-600 border-transparent hover:text-gray-900 hover:bg-gray-50"
                     }`}
             >
                 {text}
@@ -357,7 +357,7 @@ const Reports: FC = () => {
                                 <button onClick={generateVolumeReport} className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white">
                                     Generate Report
                                 </button>
-                                {volumeReportTotal !== null && !lodash.isEqual(graphData, defaultGraphData) && (
+                                {volumeReportTotal !== null && !isEqual(graphData, defaultGraphData) && (
                                     <div className="mt-8 w-100 px-4 flex flex-col items-center space-y-4">
                                         <h2 className="text-xl font-semibold text-gray-600">
                                             Total volume {volumeReportExercise ? `for ${volumeReportExercise}` : "for all exercises"}: {volumeReportTotal.toLocaleString()} lbs
@@ -381,7 +381,7 @@ const Reports: FC = () => {
                                 <button onClick={generate1RMReport} className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white">
                                     Generate Report
                                 </button>
-                                {oneRepMaxExercise !== "" && !lodash.isEqual(graphData, defaultGraphData) && (
+                                {oneRepMaxExercise !== "" && !isEqual(graphData, defaultGraphData) && (
                                     <div className="mt-8 w-100 px-4 flex flex-col items-center space-y-4">
                                         <h2 className="text-xl font-semibold text-gray-600">
                                             {`1RM over time for ${oneRepMaxExercise}:`}
