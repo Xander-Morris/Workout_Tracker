@@ -1,4 +1,5 @@
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios'
+import { Notifications } from './notifications';
 
 const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 
@@ -40,6 +41,7 @@ apiClient.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config as InternalAxiosRequestConfig & { retry?: boolean };
+        Notifications.showError(error);
 
         if (error.response?.status === 401 && !originalRequest.retry) {
             originalRequest.retry = true;

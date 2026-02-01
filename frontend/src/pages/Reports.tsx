@@ -3,11 +3,12 @@ import { useEffect, useState } from "react";
 import { apiClient } from "../lib/apiclient";
 import { Navbar } from "../components/navbar";
 import { ExerciseDropdown } from "../components/exercise_dropdown";
-import { Notifications } from '../lib/notifications';
 import { ListedWorkout } from "../components/listed_workout";
 import { CalendarPicker } from "../components/calendar_picker";
 import { DatesLibrary } from "../lib/dates";
 import { Line, LineChart, XAxis, YAxis, ResponsiveContainer } from 'recharts';
+import { Notifications } from "../lib/notifications";
+import * as lodash from 'lodash';
 
 const Reports: FC = () => {
     type STATUS_TYPE = "none" | "loading" | "error" | "success";
@@ -24,6 +25,7 @@ const Reports: FC = () => {
     const [endDate, setEndDate] = useState<Date | null>(null);
     const [volumeReportTotal, setVolumeReportTotal] = useState<number | null>(null);
     const [volumeReportExercise, setVolumeReportExercise] = useState<string | null>(null);
+    const [oneRepMaxExercise, setOneRepMaxExercise] = useState<string>("");
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [showStartDatePicker, setShowStartDatePicker] = useState<boolean>(false);
     const [showEndDatePicker, setShowEndDatePicker] = useState<boolean>(false);
@@ -57,7 +59,6 @@ const Reports: FC = () => {
             setWorkouts(response.data.workouts);
             setStatus("success");
         } catch (error) {
-            Notifications.showError(error);
             setWorkouts([]);
             setStatus("error");
         }
@@ -133,40 +134,61 @@ const Reports: FC = () => {
         </div>
     );
 
-    const generateVolumeReport = () => {
-        if (!startDate || !endDate) {
-            Notifications.showError("Please select both start and end dates");
-            return;
+    const areDatesValid = () => {
+        return (startDate && endDate) && (startDate <= endDate);
+    };
+
+    const generateVolumeOr1RMReport = (isVolume: boolean) => {
+        if (!areDatesValid()) { 
+            Notifications.showError("Please select a start and end date!");
+            return; 
         }
 
-        if (startDate > endDate) {
-            Notifications.showError("Start date must be before end date");
-            return;
+        if (!isVolume && (selectedExercise == null || selectedExercise == "")) {
+            Notifications.showError("Please select an exercise for the 1RM report!");
+            return; 
         }
 
-        apiClient.post("/reports/volume", {
+        const endpoint: string = isVolume ? "/reports/volume" : "/reports/onerepmax";
+        apiClient.post(endpoint, {
             start_date: DatesLibrary.convertDateToYMD(startDate),
             end_date: DatesLibrary.convertDateToYMD(endDate),
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             exercise: selectedExercise || null,
         }).then(response => {
-            setVolumeReportTotal(response.data.total_volume);
-            setVolumeReportExercise(response.data.exercise || null);
-            const volume_per_day = response.data.volume_per_day;
-            let new_graph_data: [{ name: string, amount: number }] = [];
-
-            for (let day in volume_per_day) {
-                const volume: number = volume_per_day[day];
-                day = DatesLibrary.formatDateToLocaleDateString(day, true, true);
-                new_graph_data.push({ name: day, amount: volume });
+            if (isVolume) {
+                setVolumeReportTotal(response.data.total_volume);
+                setVolumeReportExercise(response.data.exercise || null);
+            } else {
+                setOneRepMaxExercise(response.data.exercise || "");
             }
 
-            console.log(new_graph_data);
+            const per_day = response.data.per_day;
+
+            // It is possible to not return anything.
+            if (!per_day) {
+                setGraphData(defaultGraphData);
+                return;
+            }
+
+            let new_graph_data: [{ name: string, amount: number }] = [];
+
+            for (let day in per_day) {
+                const amt: number = per_day[day];
+                day = DatesLibrary.formatDateToLocaleDateString(day, true, true);
+                new_graph_data.push({ name: day, amount: amt });
+            }
 
             setGraphData(new_graph_data);
-        }).catch(error => {
-            Notifications.showError(error);
         });
+    }
+
+    const generateVolumeReport = () => {
+        generateVolumeOr1RMReport(true);
+    };
+
+    const generate1RMReport = () => {
+        generateVolumeOr1RMReport(false);
     };
 
     const calculateChartHeight = (dataLength: number) => {
@@ -182,6 +204,52 @@ const Reports: FC = () => {
             >
                 {text}
             </button>
+        );
+    };
+
+    // This could be extracted as a component later on if I want to have it in other pages, but only the reports need it for now.
+    const createDateRange = () => {
+        return (
+            <div className="w-full space-y-4">
+                {createDatePickerSection(
+                    "Start Date",
+                    startDate,
+                    showStartDatePicker,
+                    setShowStartDatePicker,
+                    handleStartDateSelect
+                )}
+                {createDatePickerSection(
+                    "End Date",
+                    endDate,
+                    showEndDatePicker,
+                    setShowEndDatePicker,
+                    handleEndDateSelect
+                )}
+            </div>
+        );
+    };
+
+    const createExerciseDropdown = () => {
+        return (
+            <ExerciseDropdown
+                toggleDropdown={toggleDropdown}
+                isVisible={dropdownVisible}
+                selectedExercise={selectedExercise}
+                exercises={exercises}
+                handleToggle={handleToggle}
+            />
+        );
+    };
+
+    const createGraph = () => {
+        return (
+            <ResponsiveContainer width="100%" height={calculateChartHeight(graphData.length)}>
+                <LineChart data={graphData} margin={{ top: 20, right: 20, left: 0, bottom: 70 }}>
+                    <XAxis dataKey="name" interval={0} height={60} tick={{ angle: -45, textAnchor: 'end' }} />
+                    <YAxis width={60} />
+                    <Line type="monotone" dataKey="amount" stroke="#8884d8" />
+                </LineChart>
+            </ResponsiveContainer>
         );
     };
 
@@ -275,46 +343,42 @@ const Reports: FC = () => {
                             <div className="w-full max-w-3xl px-4 flex flex-col items-center space-y-4 transform -translate-y-[40px]">
                                 <h1 className="text-gray-900 text-lg">Volume Report</h1>
 
-                                <div className="w-full space-y-4">
-                                    {createDatePickerSection(
-                                        "Start Date",
-                                        startDate,
-                                        showStartDatePicker,
-                                        setShowStartDatePicker,
-                                        handleStartDateSelect
-                                    )}
-                                    {createDatePickerSection(
-                                        "End Date",
-                                        endDate,
-                                        showEndDatePicker,
-                                        setShowEndDatePicker,
-                                        handleEndDateSelect
-                                    )}
-                                </div>
-
-                                <ExerciseDropdown
-                                    toggleDropdown={toggleDropdown}
-                                    isVisible={dropdownVisible}
-                                    selectedExercise={selectedExercise}
-                                    exercises={exercises}
-                                    handleToggle={handleToggle}
-                                />
+                                {createDateRange()}
+                                {createExerciseDropdown()}
 
                                 <button onClick={generateVolumeReport} className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white">
                                     Generate Report
                                 </button>
-                                {volumeReportTotal !== null && (
+                                {volumeReportTotal !== null && !lodash.isEqual(graphData, defaultGraphData) && (
                                     <div className="mt-8 w-100 px-4 flex flex-col items-center space-y-4">
                                         <h2 className="text-xl font-semibold text-gray-600">
                                             Total volume {volumeReportExercise ? `for ${volumeReportExercise}` : "for all exercises"}: {volumeReportTotal.toLocaleString()} lbs
                                         </h2>
-                                        <ResponsiveContainer width="100%" height={calculateChartHeight(graphData.length)}>
-                                            <LineChart data={graphData} margin={{ top: 20, right: 20, left: 0, bottom: 70 }}>
-                                                <XAxis dataKey="name" interval={0} height={60} tick={{ angle: -45, textAnchor: 'end' }} />
-                                                <YAxis width={60} />
-                                                <Line type="monotone" dataKey="amount" stroke="#8884d8" />
-                                            </LineChart>
-                                        </ResponsiveContainer>
+                                        {createGraph()}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Report: 1RM */}
+                    {reportType === "1rm" && (
+                        <div className="flex justify-center pt-32">
+                            <div className="w-full max-w-3xl px-4 flex flex-col items-center space-y-4 transform -translate-y-[40px]">
+                                <h1 className="text-gray-900 text-lg">1RM Report</h1>
+
+                                {createDateRange()}
+                                {createExerciseDropdown()}
+
+                                <button onClick={generate1RMReport} className="w-full rounded-lg bg-blue-600 px-4 py-2 text-white">
+                                    Generate Report
+                                </button>
+                                {oneRepMaxExercise !== "" && !lodash.isEqual(graphData, defaultGraphData) && (
+                                    <div className="mt-8 w-100 px-4 flex flex-col items-center space-y-4">
+                                        <h2 className="text-xl font-semibold text-gray-600">
+                                            {`1RM over time for ${oneRepMaxExercise}:`}
+                                        </h2>
+                                        {createGraph()}
                                     </div>
                                 )}
                             </div>

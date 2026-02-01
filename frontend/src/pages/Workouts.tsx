@@ -44,8 +44,6 @@ const Workouts: FC = () => {
 
       const data = response.data;
       setWorkouts(data);
-    } catch (err: any) {
-      Notifications.showError(err);
     } finally {
       setLoading(false);
     }

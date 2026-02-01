@@ -10,6 +10,10 @@ export const Notifications = {
         || (typeof(error) == "string" && error) 
         || DEFAULT_ERROR_MESSAGE;
 
+        if (error.response?.data?.detail[0]) {
+            errorMessage = error.response.data.detail[0].msg;
+        }
+
         if (typeof(errorMessage) !== "string") {
             errorMessage = DEFAULT_ERROR_MESSAGE;
         }

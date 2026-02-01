@@ -75,5 +75,15 @@ class VolumeOverPeriodRequest(BaseModel):
 
 class VolumeOverPeriodReport(BaseModel):
     total_volume: float = 0 # It's a float since the weight can be a float.
-    volume_per_day: Optional[dict[AwareDatetime, int]] = None
+    per_day: Optional[dict[AwareDatetime, float]] = None
     exercise: str # None gets converted to ""
+
+class OneRepMaxRequest(BaseModel):
+    start_date: date
+    end_date: date
+    timezone: str
+    exercise: str
+
+class OneRepMaxReport(BaseModel):
+    per_day: Optional[dict[AwareDatetime, float]] = None
+    exercise: str 
