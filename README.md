@@ -1,3 +1,6 @@
-Full-stack project that allows you to track workouts for progress. <br>
-The backend uses Python with FastAPI, MongoDB, and JWT authentication tokens. <br> 
-The frontend uses TypeScript with ReactJS and TailwindCSS. <br>
+Full-Stack Web Application
+
+Designed and developed a full-stack workout tracking platform for logging workouts, scheduling sessions, and visualizing long-term fitness progress.
+Implemented secure user authentication and authorization with JWT, enforcing protected routes and role-based access.
+Built RESTful backend services with Python, FastAPI, and MongoDB, including complex aggregation queries for weekly/monthly progress reports.
+Developed responsive frontend views with TypeScript, React, and Tailwind CSS, integrating calendars, scheduling workflows, and real-time UI updates via state management.
