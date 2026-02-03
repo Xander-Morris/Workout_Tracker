@@ -21,8 +21,8 @@ const Reports: FC = () => {
     const [selectedExercise, setSelectedExercise] = useState("");
     const [status, setStatus] = useState<STATUS_TYPE>("none");
     const [workouts, setWorkouts] = useState<Workout[]>([]);
-    const [startDate, setStartDate] = useState<Date | null>(null);
-    const [endDate, setEndDate] = useState<Date | null>(null);
+    const [startDate, setStartDate] = useState<Date>(new Date());
+    const [endDate, setEndDate] = useState<Date>(new Date());
     const [volumeReportTotal, setVolumeReportTotal] = useState<number | null>(null);
     const [volumeReportExercise, setVolumeReportExercise] = useState<string | null>(null);
     const [oneRepMaxExercise, setOneRepMaxExercise] = useState("");
@@ -87,8 +87,8 @@ const Reports: FC = () => {
         setWorkouts([]);
         setStatus("none");
         setDropdownVisible(false);
-        setStartDate(null);
-        setEndDate(null);
+        setStartDate(new Date());
+        setEndDate(new Date());
         setVolumeReportTotal(null);
         setVolumeReportExercise(null);
         setGraphData(defaultGraphData);
