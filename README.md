@@ -1,6 +1,6 @@
 Full-Stack Web Application
 
-Developed a full-stack workout tracking platform allowing users to log workouts, schedule sessions, and monitor progress over time.
-Implemented secure user authentication and authorization using JWT tokens.
-Built RESTful backend services with Python, FastAPI, and MongoDB, including database queries and reporting logic.
-Created a responsive, dynamic frontend using TypeScript, React, and Tailwind CSS with real-time UI updates.
+• Designed a full-stack workout tracking system with persistent user state, workout history, and progress analytics.
+• Implemented JWT-based authentication and role-scoped authorization for secure API access.
+• Built FastAPI services with MongoDB, including aggregation queries to compute workout frequency and progression trends over time.
+• Developed a React + TypeScript frontend with responsive layouts and real-time UI updates tied to backend state changes.
