@@ -171,13 +171,11 @@ const Reports: FC = () => {
                 return;
             }
 
-            let new_graph_data: [{ name: string, amount: number }] = [];
-
-            for (let day in per_day) {
+            let new_graph_data: [{ name: string, amount: number }] = per_day.forEach((day: string) => {
                 const amt: number = per_day[day];
                 day = DatesLibrary.formatDateToLocaleDateString(day, true, true);
                 new_graph_data.push({ name: day, amount: amt });
-            }
+            });
 
             setGraphData(new_graph_data);
         });
@@ -249,7 +247,7 @@ const Reports: FC = () => {
         return (
             <ResponsiveContainer width="100%" height={calculateChartHeight(graphData.length)}>
                 <LineChart data={graphData} margin={{ top: 20, right: 20, left: 0, bottom: 70 }}>
-                    <XAxis dataKey="name" interval={0} height={60} tick={{ angle: -45, textAnchor: 'end' }} />
+                    <XAxis dataKey="name" interval={0} height={60} tick={{ textAnchor: 'end' }} />
                     <YAxis width={60} />
                     <Line type="monotone" dataKey="amount" stroke="#8884d8" />
                 </LineChart>
