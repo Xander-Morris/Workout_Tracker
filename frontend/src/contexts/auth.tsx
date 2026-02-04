@@ -80,7 +80,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const validateForm = (formData: any): boolean => {
     const newErrors: Record<string, string> = {};
-    console.log(formData);
     if (formData.email?.trim().length === 0) newErrors.email = "Email is required";
     if (formData.username?.trim().length === 0) newErrors.username = "Username is required";
     if (formData.email_or_username?.trim().length === 0) newErrors.email_or_username = "Email or username is required";

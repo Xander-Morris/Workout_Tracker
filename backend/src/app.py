@@ -22,18 +22,16 @@ async def rate_limit_handler(request, exc):
     )
 
 origins = [
-    "http://localhost:5173",  # Development frontend
-    "http://localhost:8000",  # Development backend
-    "https://workout-tracker-beta-five.vercel.app", # Vercel frontend
-    "https://workout-tracker-backend-seven.vercel.app", # Vercel backend
+    "http://localhost:5173",  # dev frontend
+    "https://workout-tracker-beta-five.vercel.app",  # prod frontend
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=origins,       # only frontend URLs
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE"],
-    allow_headers=["Content-Type", "Authorization"],
+    allow_methods=["*"],         # GET, POST, PUT, DELETE, OPTIONS
+    allow_headers=["*"],         # Content-Type, Authorization, etc.
 )
 
 app.include_router(auth.router)
@@ -43,8 +41,4 @@ app.include_router(settings.router)
 
 @app.get("/")
 async def root():
-    return {"Detail": "This is a workout tracker."}
-
-"""if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("app:app", host="localhost", port=8000, reload=True)"""
+    return {"Detail": "This is the backend of the workout tracker."}
