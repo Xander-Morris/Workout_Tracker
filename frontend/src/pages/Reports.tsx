@@ -13,7 +13,11 @@ import { Notifications } from "../lib/notifications";
 const Reports: FC = () => {
     type STATUS_TYPE = "none" | "loading" | "error" | "success";
     type REPORT_TYPE_OPEN = "contains" | "volume" | "1rm";
-    const defaultGraphData: [{ name: string, amount: number, }] = [{ name: "", amount: 0 },];
+    type GRAPH_POINT = {
+        name: string;
+        amount: number;
+    };
+    const defaultGraphData: [GRAPH_POINT] = [{ name: "", amount: 0 },];
 
     const [reportType, setReportType] = useState<REPORT_TYPE_OPEN>("contains");
     const [dropdownVisible, setDropdownVisible] = useState(false);
@@ -29,7 +33,7 @@ const Reports: FC = () => {
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [showStartDatePicker, setShowStartDatePicker] = useState(false);
     const [showEndDatePicker, setShowEndDatePicker] = useState(false);
-    const [graphData, setGraphData] = useState<[{ name: string, amount: number, }]>(defaultGraphData);
+    const [graphData, setGraphData] = useState<GRAPH_POINT[]>(defaultGraphData);
 
     const setReportTypeToContains = () => setReportType("contains");
     const setReportTypeToVolume = () => setReportType("volume");
@@ -171,11 +175,12 @@ const Reports: FC = () => {
                 return;
             }
 
-            let new_graph_data: [{ name: string, amount: number }] = per_day.forEach((day: string) => {
-                const amt: number = per_day[day];
-                day = DatesLibrary.formatDateToLocaleDateString(day, true, true);
-                new_graph_data.push({ name: day, amount: amt });
-            });
+            const new_graph_data: GRAPH_POINT[] = Object.entries(per_day).map(
+                ([day, amt]) => ({
+                    name: DatesLibrary.formatDateToLocaleDateString(day, true, true),
+                    amount: amt as number,
+                })
+            );
 
             setGraphData(new_graph_data);
         });
