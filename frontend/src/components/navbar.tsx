@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { useAuth } from '../contexts/auth'
 import { useLocation } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
-import '../index.css'
 
 export const Navbar = () => {
     const { user, logout } = useAuth();

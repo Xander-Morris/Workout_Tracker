@@ -1,7 +1,6 @@
 import type { FC } from 'react'
 import { Link } from "react-router-dom";
 import { Navbar } from "../components/navbar.tsx";
-import '../index.css'
 import { ImageCarousel } from "../components/image_carousel.tsx";
 import { useAuth } from '../contexts/auth'
 
@@ -19,7 +18,7 @@ const Home: FC = () => {
             <Navbar></Navbar>
             <main>
                 <section className="relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600/30 via-purple-600/20 to-pink-600/20 blur-3xl" />
+                    <div className="" />
                     <section className="max-w-7xl mx-auto px-6 py-24">
                         <ImageCarousel photos={photos} />
                     </section>
@@ -28,10 +27,10 @@ const Home: FC = () => {
                             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-none tracking-tight">
                                 Train smarter.
                                 <br />
-                                <span className="text-indigo-400">Progress faster.</span>
+                                <span className="text-blue-200">Progress faster.</span>
                             </h1>
 
-                            <p className="mt-8 text-lg text-slate-800 max-w-md">
+                            <p className="mt-8 text-lg text-gray-200 max-w-md">
                                 Log workouts, visualize progress, and build consistency with a fast, no-nonsense tracking system.
                             </p>
 

@@ -1,6 +1,5 @@
 import type { FC } from 'react'
 import { useEffect, useState } from 'react'
-import '../index.css'
 import { apiClient } from "../lib/apiclient";
 import { BackButton } from "../components/back_button";
 

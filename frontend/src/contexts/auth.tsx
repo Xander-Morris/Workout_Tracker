@@ -1,6 +1,7 @@
 import { createContext, useState, useEffect, useContext, type ReactNode } from "react";
 import { toast } from "react-hot-toast";
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { apiClient, unauthenticatedClient } from "../lib/apiclient";
 
 interface AuthProviderProps {
@@ -45,6 +46,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Reset errors each time the current page changes.
+  useEffect(() => {
+    setErrors({});
+  }, [location.pathname]);
 
   const isAuthenticated = () => {
     return !!localStorage.getItem("access_token");
@@ -85,6 +92,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     if (formData.email_or_username?.trim().length === 0) newErrors.email_or_username = "Email or username is required";
     if (formData.password?.trim().length === 0) newErrors.password = "Password is required";
     setErrors(newErrors);
+
     return Object.keys(newErrors).length === 0;
   };
 

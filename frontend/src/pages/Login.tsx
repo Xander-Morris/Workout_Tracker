@@ -1,8 +1,8 @@
 import type { FC } from 'react'
-import '../index.css'
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Form } from "../components/form"
 import { useAuth } from '../contexts/auth'
+import { PasswordInput, TextInput } from '../components/text_input';
 
 const Login: FC = () => {
     const { login, isLoading, errors } = useAuth();
@@ -32,100 +32,62 @@ const Login: FC = () => {
                     <h2 className="text-3xl font-bold text-gray-900 mb-2">
                         Welcome back
                     </h2>
-                    <p className="text-gray-600">
+                    <p className="text-gray-900">
                         Sign in to your Workout Tracker account to continue
                     </p>
                 </div>
 
-                <div className="bg-white rounded-2xl shadow-xl p-8">
-                    <form className="space-y-6" onSubmit={handleSubmit}>
-                        {/* Email or username field */}
-                        <div>
-                            <label htmlFor="email_or_username" className="text-left block text-sm font-medium text-gray-700 mb-2">
-                                Email or Username
-                            </label>
-                            <input
-                                id="email_or_username"
-                                name="email_or_username"
-                                type="text"
-                                value={formData.email_or_username}
-                                onChange={handleChange}
-                                className={`text-gray-700 w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${errors.email_or_username ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                                    }`}
-                                placeholder="Enter your email or username"
-                            />
-                        </div>
+                <Form onSubmit={handleSubmit}>
+                    <TextInput
+                        id="email_or_username"
+                        name="email_or_username"
+                        display_name="Email or Username"
+                        value={formData.email_or_username}
+                        onChange={handleChange}
+                        placeholder="Enter your email or username"
+                        error={errors.email_or_username}
+                    />
 
-                        {/* Password Field */}
-                        <div>
-                            <label htmlFor="password" className="text-left block text-sm font-medium text-gray-700 mb-2">
-                                Password
-                            </label>
-                            <input
-                                id="password"
-                                name="password"
-                                type="password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                className={`text-gray-700 w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${errors.password ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                                    }`}
-                                placeholder="Enter your password"
-                            />
-                        </div>
+                    <PasswordInput
+                        id="password"
+                        name="password"
+                        display_name="Password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        placeholder="Enter your password"
+                        error={errors.password}
+                    />
 
-                        {/* This should be added eventually for polishing reasons.
-                        <div className="flex items-center justify-between">
-                            <div className="text-sm">
-                                <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors">
-                                    Forgot your password?
-                                </a>
-                            </div>
-                        </div>  
-                        */}
-
-                        <button
-                            type="submit"
-                            disabled={isLoading}
-                            className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-sm font-medium text-white transition-colors ${isLoading
+                    <button
+                        type="submit"
+                        disabled={isLoading}
+                        className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-sm font-medium text-white transition-colors ${isLoading
                                 ? 'bg-indigo-400 cursor-not-allowed'
                                 : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
-                                }`}
-                        >
-                            {isLoading ? (
-                                <div className="flex items-center">
-                                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    Signing in...
-                                </div>
-                            ) : (
-                                'Sign in'
-                            )}
-                        </button>
-
-                        <div className="text-center">
-                            <p className="text-sm text-gray-600">
-                                Don't have an account?{' '}
-                                <Link
-                                    to="/signup"
-                                    className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
-                                >
-                                    Create one here
-                                </Link>
-                            </p>
-                        </div>
-                    </form>
-                </div>
-
-                <div className="text-center">
-                    <Link
-                        to="/"
-                        className="text-indigo-600 hover:text-indigo-500 text-sm font-medium transition-colors"
+                            }`}
                     >
-                        ← Back to home
-                    </Link>
-                </div>
+                        {isLoading ? (
+                            <div className="flex items-center">
+                                <svg
+                                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path
+                                        className="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                    ></path>
+                                </svg>
+                                Signing in...
+                            </div>
+                        ) : (
+                            'Sign in'
+                        )}
+                    </button>
+                </Form>
             </div>
         </div>
     );
