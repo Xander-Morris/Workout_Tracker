@@ -8,18 +8,25 @@ from lib.misc.error_handler import APIError, ErrorMessage
 
 router = APIRouter(tags=["auth"], prefix="/auth")
 REFRESH_TOKEN_DAYS = int(os.getenv("REFRESH_TOKEN_DAYS"))
+IS_PRODUCTION = os.getenv("ENVIRONMENT") == "production"
 
 def ResponseSetCookieHelper(response: Response, refresh_token: str):
-    is_production = os.getenv("ENVIRONMENT") == "production"
-
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        secure=is_production,               
-        samesite="none" if is_production else "lax",
+        secure=IS_PRODUCTION,               
+        samesite="none" if IS_PRODUCTION else "lax",
         path="/",
         max_age=REFRESH_TOKEN_DAYS * 24 * 60 * 60,
+    )
+
+def ResponseDeleteCookieHelper(response: Response):
+    response.delete_cookie(
+        key="refresh_token",
+        path="/",
+        secure=IS_PRODUCTION,
+        samesite="none" if IS_PRODUCTION else "lax",
     )
 
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
@@ -95,12 +102,6 @@ async def Refresh(request: Request, response: Response):
 @limiter.limit("5/minute")
 async def Logout(request: Request, response: Response, current_user: models.CurrentUser = Depends(auth_helper.GetCurrentUser)):
     user_methods.RevokeAllUserRefreshTokens(current_user.user_id)
-
-    response.delete_cookie(
-        key="refresh_token",
-        path="/",
-        secure=True,
-        samesite="none"
-    )
+    ResponseDeleteCookieHelper(response)
 
     return {"message": "Logged out successfully"}
