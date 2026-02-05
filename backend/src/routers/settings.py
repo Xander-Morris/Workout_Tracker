@@ -22,7 +22,7 @@ async def GetAllSettings(
         raise APIError.server_error(ErrorMessage.FAILED_TO_RETRIEVE)
 
     return models.UserSettings(
-        bodyweight=user_record["bodyweight"]
+        bodyweight=(user_record.get("bodyweight") or 0)
     )
 
 # UPDATE BODYWEIGHT
