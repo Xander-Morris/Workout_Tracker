@@ -12,6 +12,9 @@ const VerifyEmailPage = () => {
         const token = searchParams.get("token");
         const email = searchParams.get("email");
 
+        console.log(token);
+        console.log(email);
+
         if (!token || !email) {
             setStatus("Invalid verification link.");
             return;

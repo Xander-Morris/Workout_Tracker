@@ -122,9 +122,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  const authenticate = async (token: string, email: string) => {
+  const authenticate = async (verification_token: string, email: string) => {
     try {
-      const request_data = { token, email };
+      const request_data = { verification_token, email };
       const response = await unauthenticatedClient.post("/auth/authenticate", request_data);
 
       if (response.status === 200) {
