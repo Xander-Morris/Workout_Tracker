@@ -6,6 +6,7 @@ import lib.database_lib.auth_helper as auth_helper
 import os
 from config import limiter
 from lib.misc.error_handler import APIError, ErrorMessage
+import lib.database_lib.database_config as database_config
 
 router = APIRouter(tags=["auth"], prefix="/auth")
 REFRESH_TOKEN_DAYS = int(os.getenv("REFRESH_TOKEN_DAYS"))
@@ -71,6 +72,8 @@ async def VerifyUser(request: Request, auth_request_user: models.AuthRequestUser
     if pending_user.get("verification_token") != auth_request_user.verification_token:
         raise APIError.unauthorized("Invalid verification token")
     
+    pending_user = database_config.MakeDatetimeAware(pending_user)
+
     if pending_user.get("expires_at") < datetime.now(timezone.utc):
         user_methods.DeletePendingUserByEmail(auth_request_user.email)
         raise APIError.unauthorized("Verification token expired")
