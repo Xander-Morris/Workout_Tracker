@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect, useContext, type ReactNode } from "react";
-import { toast } from "react-hot-toast";
+import { Notifications } from "./notifications";
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { apiClient, unauthenticatedClient } from "./apiclient";
@@ -112,11 +112,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       setAccessToken(newAccessToken);
 
-      toast.success("Login successful!");
+      Notifications.showSuccess("Login successful!");
       navigate('/workouts');
     } catch (error: any) {
       console.error("Login error:", error);
-      toast.error(error.response?.data?.detail || "Login failed");
+      Notifications.showError(error);
     } finally {
       setIsLoading(false);
     }
@@ -128,17 +128,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const response = await unauthenticatedClient.post("/auth/authenticate", request_data);
 
       if (response.status === 200) {
-        toast.success("Email verified successfully! Redirecting to workouts...");
+        Notifications.showSuccess("Email verified successfully! Redirecting to workouts...");
         const newAccessToken = response.data.access_token;
         setAccessToken(newAccessToken);
-        toast.success("Authentication successful!");
+        Notifications.showSuccess("Authentication successful!");
         navigate('/workouts');
       } else {
-        toast.error("Verification failed. Please try again.");
+        Notifications.showError("Verification failed. Please try again.");
       }
     } catch (error) {
-      console.error("Verification error:", error);
-      toast.error("Verification failed. Please try again.");
+      Notifications.showError(error);
     }
   };
 
@@ -154,7 +153,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       await unauthenticatedClient.post("/auth/signup", request_data);
     } catch (error: any) {
       console.error("Signup error:", error);
-      toast.error(error.response?.data?.detail || "Signup failed");
+      Notifications.showError(error);
     } finally {
       setIsLoading(false);
     }
@@ -169,7 +168,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setAccessToken(null);
       setUser(null);
       localStorage.removeItem("access_token");
-      toast.success("Logged out");
+      Notifications.showSuccess("Logged out");
       navigate('/');
     }
   };
