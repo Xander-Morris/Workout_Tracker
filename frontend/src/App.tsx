@@ -20,7 +20,9 @@ function Layout() {
   return (
     <AuthProvider>
       <Outlet />
-      <Toaster />
+      <Toaster toastOptions={{
+          duration: 3500, 
+        }} />
     </AuthProvider>
   )
 }
