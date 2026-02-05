@@ -41,7 +41,7 @@ function App() {
           element: <Signup />,
         },
         {
-          path: "auth/authenticate",
+          path: "authenticate",
           element: <VerifyEmailPage />,
         },
         {
@@ -72,6 +72,7 @@ function App() {
             </ProtectedRoute>
           )
         },
+        { path: "*", element: <ErrorPage /> },
       ],
     },
   ]);

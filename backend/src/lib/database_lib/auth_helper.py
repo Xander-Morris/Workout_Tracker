@@ -26,7 +26,7 @@ SENDER_EMAIL_PASSWORD = os.getenv("SENDER_EMAIL_PASSWORD")
 def sendVerificationEmail(email: str, username: str, hashed_password: str) -> bool:
     token = secrets.token_urlsafe(32)
     user_methods.CreateUser(email, username, hashed_password, token)
-    verification_link = f"{FRONTEND_URL}/auth/authenticate?token={token}&email={email}"
+    verification_link = f"{FRONTEND_URL}/authenticate?token={token}&email={email}"
     subject = "Verify Your Account"
     body = f"Please click the following link to verify your email and create your account: {verification_link}"
     msg = MIMEMultipart()
