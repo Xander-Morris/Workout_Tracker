@@ -69,17 +69,17 @@ async def SignUp(request: Request, user: models.UserCreate, response: Response):
 
 @router.get("/authenticate", models.TokenResponse, status_code=status.HTTP_200_OK)
 @limiter.limit("10/minute")
-async def VerifyUser(token: str, email: str, request: Request, response: Response):
-    pending_user = user_methods.GetPendingUserByEmail(email)
+async def VerifyUser(request: Request, auth_request_user: models.AuthRequestUser, response: Response):
+    pending_user = user_methods.GetPendingUserByEmail(auth_request_user.email)
     
     if not pending_user:
         raise APIError.not_found("Pending user not found")
     
-    if pending_user.get("verification_token") != token:
+    if pending_user.get("verification_token") != auth_request_user.verification_token:
         raise APIError.unauthorized("Invalid verification token")
     
     if pending_user.get("expires_at") < datetime.datetime.now(datetime.timezone.utc):
-        user_methods.DeletePendingUserByEmail(email)
+        user_methods.DeletePendingUserByEmail(auth_request_user.email)
         raise APIError.unauthorized("Verification token expired")
     
     user_id = user_methods.CreateUser(
@@ -88,11 +88,11 @@ async def VerifyUser(token: str, email: str, request: Request, response: Respons
         hashed_password=pending_user["password"]
     )
     
-    user_methods.DeletePendingUserByEmail(email)
+    user_methods.DeletePendingUserByEmail(auth_request_user.email)
     
     device_fingerprint = auth_helper.GenerateDeviceFingerprint(request)
     access_token, refresh_token = auth_helper.CreateTokenPair(
-        user_id, email, pending_user["username"], device_fingerprint
+        user_id, auth_request_user.email, username=pending_user["username"], device_fingerprint=device_fingerprint
     )
     
     ResponseSetCookieHelper(response, refresh_token)
