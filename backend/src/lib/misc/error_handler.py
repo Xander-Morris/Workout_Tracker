@@ -54,7 +54,8 @@ class ErrorMessage:
     """Standardized error messages"""
     
     # Auth errors
-    USER_ALREADY_EXISTS = "Either your email or username is already being used"
+    PENDING_USER_ALREADY_EXISTS = "An email verification link has already been sent for this user"
+    VERIFIED_USER_ALREADY_EXISTS = "Either your email or username is already being used"
     INVALID_CREDENTIALS = "Incorrect email, username, or password"
     PASSWORD_WEAK = "Password does not meet strength requirements"
     REFRESH_TOKEN_MISSING = "Refresh token not found"
