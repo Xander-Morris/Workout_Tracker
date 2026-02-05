@@ -13,7 +13,6 @@ import secrets
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-import user_methods
 
 SECRET_KEY = config.SECRET_KEY
 ph = PasswordHasher()
