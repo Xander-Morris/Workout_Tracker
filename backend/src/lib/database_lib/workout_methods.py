@@ -5,6 +5,12 @@ from pymongo.results import InsertOneResult
 from typing import Dict, List, Optional
 from .database_config import GetDb, MakeDatetimeAware
 
+def EnsureIndexes():
+    workouts = GetDb()["workouts"]
+    workouts.create_index([("user_id", 1), ("scheduled_date", -1)])
+    workouts.create_index([("user_id", 1), ("exercises.name", 1)])
+    workouts.create_index([("_id", 1), ("user_id", 1)])
+
 def UpdateWorkout(workout_id: str, user_id: str, update_data: Dict) -> bool:
     workouts = GetDb()["workouts"]
 
@@ -50,7 +56,7 @@ def GetWorkoutsForUser(user_id: str,
         if end_date:
             filter_query["scheduled_date"]["$lte"] = end_date
 
-    cursor = workouts.find(filter_query) \
+    cursor = workouts.find(filter_query)
                     .sort("scheduled_date", -1  ) \
                     .skip(skip) \
                     .limit(limit)

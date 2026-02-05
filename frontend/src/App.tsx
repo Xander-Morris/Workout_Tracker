@@ -12,6 +12,7 @@ import Workouts from './pages/Workouts';
 import Reports from './pages/Reports';
 import ErrorPage from './pages/ErrorPage';
 import Settings from './pages/Settings';
+import VerifyEmailPage from "./pages/VerifyEmailPage";
 import ProtectedRoute from './wrappers/protected_route';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 
@@ -38,6 +39,10 @@ function App() {
         {
           path: "signup",
           element: <Signup />,
+        },
+        {
+          path: "auth/authenticate",
+          element: <VerifyEmailPage />,
         },
         {
           path: "login",

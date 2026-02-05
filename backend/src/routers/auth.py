@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi import HTTPException, status, APIRouter, Depends, Request, Response
 import lib.database_lib.user_methods as user_methods
 import lib.database_lib.models as models
@@ -42,21 +43,64 @@ async def SignUp(request: Request, user: models.UserCreate, response: Response):
     
     response = emailable_client.verify(email=user.email)
 
-    if response['state'] == 'deliverable':
-        hashed_password = auth_helper.GetPasswordHash(user.password)
-        user_id = user_methods.CreateUser(user.email, user.username, hashed_password)
-        device_fingerprint = auth_helper.GenerateDeviceFingerprint(request)
-        access_token, refresh_token = auth_helper.CreateTokenPair(user_id, user.email, 
-                                                                username=user.username, device_fingerprint=device_fingerprint)
-        
-        ResponseSetCookieHelper(response, refresh_token)
-        
-        return models.TokenResponse(
-            access_token=access_token,
-            token_type="bearer"
-        )
-    else:
-        raise APIError.validation_error("Email could not be validated.")
+    if response['state'] != 'deliverable':
+        raise APIError.validation_error("Email could not be validated as existing.")
+
+    hashed_password = auth_helper.GetPasswordHash(user.password)
+    success = auth_helper.sendVerificationEmail(user.email, user.username, hashed_password)
+
+    if not success:
+        raise APIError.server_error("Failed to send verification email. Please try again later.")
+    
+    return {"message": "Signup successful! Check your email to verify your account."}
+
+    """hashed_password = auth_helper.GetPasswordHash(user.password)
+    user_id = user_methods.CreateUser(user.email, user.username, hashed_password)
+    device_fingerprint = auth_helper.GenerateDeviceFingerprint(request)
+    access_token, refresh_token = auth_helper.CreateTokenPair(user_id, user.email, 
+                                                            username=user.username, device_fingerprint=device_fingerprint)
+    
+    ResponseSetCookieHelper(response, refresh_token)
+    
+    return models.TokenResponse(
+        access_token=access_token,
+        token_type="bearer"
+    )"""
+
+@router.get("/authenticate", models.TokenResponse, status_code=status.HTTP_200_OK)
+@limiter.limit("10/minute")
+async def VerifyUser(token: str, email: str, request: Request, response: Response):
+    pending_user = user_methods.GetPendingUserByEmail(email)
+    
+    if not pending_user:
+        raise APIError.not_found("Pending user not found")
+    
+    if pending_user.get("verification_token") != token:
+        raise APIError.unauthorized("Invalid verification token")
+    
+    if pending_user.get("expires_at") < datetime.datetime.now(datetime.timezone.utc):
+        user_methods.DeletePendingUserByEmail(email)
+        raise APIError.unauthorized("Verification token expired")
+    
+    user_id = user_methods.CreateUser(
+        email=pending_user["email"],
+        username=pending_user["username"],
+        hashed_password=pending_user["password"]
+    )
+    
+    user_methods.DeletePendingUserByEmail(email)
+    
+    device_fingerprint = auth_helper.GenerateDeviceFingerprint(request)
+    access_token, refresh_token = auth_helper.CreateTokenPair(
+        user_id, email, pending_user["username"], device_fingerprint
+    )
+    
+    ResponseSetCookieHelper(response, refresh_token)
+    
+    return models.TokenResponse(
+        access_token=access_token,
+        token_type="bearer"
+    )
 
 @router.post("/login", status_code=status.HTTP_200_OK)
 @limiter.limit("5/minute")

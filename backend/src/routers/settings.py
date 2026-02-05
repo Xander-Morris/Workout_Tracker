@@ -16,13 +16,13 @@ async def GetAllSettings(
     request: Request,
     current_user = Depends(auth_helper.GetCurrentUser)
 ):
-    user_details = user_methods.GetAllUserDetails(current_user.email)
+    user_record = user_methods.GetUserRecordByEmail(current_user.email)
 
-    if not user_details:
+    if not user_record:
         raise APIError.server_error(ErrorMessage.FAILED_TO_RETRIEVE)
 
     return models.UserSettings(
-        bodyweight=user_details["bodyweight"]
+        bodyweight=user_record["bodyweight"]
     )
 
 # UPDATE BODYWEIGHT

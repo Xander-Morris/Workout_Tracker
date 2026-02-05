@@ -1,28 +1,113 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional
 from .database_config import GetDb
+
+from .database_config import GetDb
+import pymongo
+
+def EnsureIndexes() -> None:
+    db = GetDb()
+
+    users = db["users"]
+    pending_users = db["pending_users"]
+    refresh_tokens = db["refresh_tokens"]
+
+    # USERS
+    users.create_index(
+        [("email", pymongo.ASCENDING)],
+        unique=True,
+        name="users_email_unique"
+    )
+
+    users.create_index(
+        [("username", pymongo.ASCENDING)],
+        unique=True,
+        name="users_username_unique"
+    )
+
+    # PENDING USERS
+    pending_users.create_index(
+        [("email", pymongo.ASCENDING)],
+        unique=True,
+        name="pending_users_email_unique"
+    )
+
+    pending_users.create_index(
+        [("username", pymongo.ASCENDING)],
+        unique=True,
+        name="pending_users_username_unique"
+    )
+
+    pending_users.create_index(
+        [("verification_token", pymongo.ASCENDING)],
+        unique=True,
+        name="pending_users_verification_token_unique"
+    )
+
+    pending_users.create_index(
+        [("expires_at", pymongo.ASCENDING)],
+        expireAfterSeconds=0,
+        name="pending_users_expiration_ttl"
+    )
+
+    # REFRESH TOKENS
+    refresh_tokens.create_index(
+        [("token_hash", pymongo.ASCENDING)],
+        unique=True,
+        name="refresh_tokens_token_hash_unique"
+    )
+
+    refresh_tokens.create_index(
+        [("user_id", pymongo.ASCENDING)],
+        name="refresh_tokens_user_id"
+    )
+
+    refresh_tokens.create_index(
+        [("expires_at", pymongo.ASCENDING)],
+        expireAfterSeconds=0,
+        name="refresh_tokens_expiration_ttl"
+    )
 
 # Both the email and the username must be unique at this point in time.
 # This might change in the future.
 def DoesUserExist(email: str | None = None, username: str | None = None) -> bool:
     users = GetDb()["users"]
+    pending_users = GetDb()["pending_users"]
 
-    return (email and users.find_one({"email": email}) is not None) or (username and users.find_one({"username": username}) is not None)
+    if email:
+        if users.find_one({"email": email}) or pending_users.find_one({"email": email}):
+            return True
 
-def CreateUser(email: str, username: str, hashed_password: str) -> str:
+    if username:
+        if users.find_one({"username": username}) or pending_users.find_one({"username": username}):
+            return True
+
+    return False
+
+def GetPendingUserByEmail(email: str) -> Optional[Dict]:
+    pending_users = GetDb()["pending_users"]
+    return pending_users.find_one({"email": email})
+
+def DeletePendingUserByEmail(email: str) -> None:
+    pending_users = GetDb()["pending_users"]
+    pending_users.delete_one({"email": email})
+
+def CreateUser(email: str, username: str, hashed_password: str, verification_token: str | None = None) -> str:
     if DoesUserExist(email, username):
         raise ValueError("User already exists") 
 
-    users = GetDb()["users"]
-    result = users.insert_one({
-        "email": email,
-        "username": username,
-        "password": hashed_password
-    })
+    collection = GetDb()["users"] if not verification_token else GetDb()["pending_users"]
+    data = {"email": email, "username": username, "password": hashed_password}
+
+    if verification_token:
+        data["verification_token"] = verification_token
+        data["expires_at"] = datetime.now(timezone.utc) + timedelta(hours=2)
+
+    result = collection.insert_one(data)
     
     return str(result.inserted_id)  
 
-def GetAllUserDetails(email: str):
+def GetUserRecordByEmail(email: str):
     users = GetDb()["users"]
 
     return users.find_one({"email": email})

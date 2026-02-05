@@ -129,12 +129,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const password: string = formData["password"];
       const request_data = { email, username, password };
       const result = await unauthenticatedClient.post("/auth/signup", request_data);
-      const newAccessToken = result.data.access_token;
+      /*const newAccessToken = result.data.access_token;
 
       setAccessToken(newAccessToken);
 
       toast.success("Signup successful!");
-      navigate('/workouts');
+      navigate('/workouts');*/
     } catch (error: any) {
       console.error("Signup error:", error);
       toast.error(error.response?.data?.detail || "Signup failed");
