@@ -1,12 +1,6 @@
-"""
-Centralized error handling utilities for consistent error responses across the API.
-"""
 from fastapi import HTTPException, status
 
-
-class APIError:
-    """Standardized API error responses"""
-    
+class APIError:    
     @staticmethod
     def validation_error(detail: str) -> HTTPException:
         """Return 400 Bad Request for validation errors"""
@@ -56,7 +50,6 @@ class APIError:
         )
 
 
-# Common error messages
 class ErrorMessage:
     """Standardized error messages"""
     
