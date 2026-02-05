@@ -115,7 +115,7 @@ def CreateUser(email: str, username: str, hashed_password: str, verification_tok
     
     return str(result.inserted_id)  
 
-def GetUserRecordByEmail(email: str):
+def GetVerifiedUserByEmail(email: str) -> Optional[Dict]:
     users = GetDb()["users"]
 
     return users.find_one({"email": email})

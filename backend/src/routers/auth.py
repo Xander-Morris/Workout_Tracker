@@ -64,6 +64,11 @@ async def SignUp(request: Request, user: models.UserCreate, response: Response):
 @router.post("/authenticate", response_model=models.TokenResponse, status_code=status.HTTP_200_OK)
 @limiter.limit("10/minute")
 async def VerifyUser(request: Request, auth_request_user: models.AuthRequestUser, response: Response):
+    verified_user = user_methods.GetVerifiedUserByEmail(auth_request_user.email)
+
+    if verified_user:
+        raise APIError.conflict("User already verified")
+
     pending_user = user_methods.GetPendingUserByEmail(auth_request_user.email)
     
     if not pending_user:
