@@ -2,7 +2,7 @@ import { createContext, useState, useEffect, useContext, type ReactNode } from "
 import { toast } from "react-hot-toast";
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
-import { apiClient, unauthenticatedClient } from "../lib/apiclient";
+import { apiClient, unauthenticatedClient } from "./apiclient";
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -36,7 +36,7 @@ const AuthContext = createContext<AuthContextType>({
   signup: async () => { },
   login: async () => { },
   logout: async () => { },
-  authenticate: async () => {},
+  authenticate: async () => { },
   isLoading: false,
   errors: {},
   isAuthenticated: isAuthenticatedDefault,
@@ -107,6 +107,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const password: string = formData["password"];
       const request_data = { email_or_username, password };
       const response = await unauthenticatedClient.post("/auth/login", request_data);
+      console.log(response);
       const newAccessToken = response.data.access_token;
 
       setAccessToken(newAccessToken);
@@ -138,7 +139,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     } catch (error) {
       console.error("Verification error:", error);
       toast.error("Verification failed. Please try again.");
-    } 
+    }
   };
 
   const signup = async (formData: any) => {

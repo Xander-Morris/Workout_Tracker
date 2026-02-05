@@ -4,7 +4,7 @@ import {
   Outlet,
 } from "react-router-dom";
 import { Toaster } from 'react-hot-toast'
-import { AuthProvider } from './contexts/auth'
+import { AuthProvider } from './lib/auth'
 import Home from './pages/Home';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
@@ -13,7 +13,7 @@ import Reports from './pages/Reports';
 import ErrorPage from './pages/ErrorPage';
 import Settings from './pages/Settings';
 import VerifyEmailPage from "./pages/VerifyEmailPage";
-import ProtectedRoute from './wrappers/protected_route';
+import ProtectedRoute from './lib/protected_route';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 
 function Layout() {
@@ -37,19 +37,19 @@ function App() {
           element: <Home />,
         },
         {
-          path: "signup",
+          path: "/signup",
           element: <Signup />,
         },
         {
-          path: "authenticate",
+          path: "/authenticate",
           element: <VerifyEmailPage />,
         },
         {
-          path: "login",
+          path: "/login",
           element: <Login />,
         },
         {
-          path: "workouts",
+          path: "/workouts",
           element: (
             <ProtectedRoute>
               <Workouts />
@@ -57,7 +57,7 @@ function App() {
           ),
         },
         {
-          path: "reports",
+          path: "/reports",
           element: (
             <ProtectedRoute>
               <Reports />
@@ -65,7 +65,7 @@ function App() {
           ),
         },
         {
-          path: "settings",
+          path: "/settings",
           element: (
             <ProtectedRoute>
               <Settings />

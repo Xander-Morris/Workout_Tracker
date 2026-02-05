@@ -2,7 +2,7 @@ import type { FC } from 'react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Form } from "../components/form"
-import { useAuth } from '../contexts/auth';
+import { useAuth } from '../lib/auth';
 import { TextInput, PasswordInput } from '../components/text_input';
 
 const checkPasswordStrength = (password: string) => ({
@@ -130,8 +130,8 @@ const Signup: FC = () => {
                         type="submit"
                         disabled={isLoading}
                         className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-sm font-medium text-white transition-colors ${isLoading
-                                ? 'bg-blue-400 cursor-not-allowed'
-                                : 'bg-blue-600 hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
+                            ? 'bg-blue-400 cursor-not-allowed'
+                            : 'bg-blue-600 hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
                             }`}
                     >
                         {isLoading ? 'Creating account...' : 'Create account'}

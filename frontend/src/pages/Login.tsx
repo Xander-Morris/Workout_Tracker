@@ -1,7 +1,7 @@
 import type { FC } from 'react'
 import { useState } from "react";
 import { Form } from "../components/form"
-import { useAuth } from '../contexts/auth'
+import { useAuth } from '../lib/auth'
 import { PasswordInput, TextInput } from '../components/text_input';
 
 const Login: FC = () => {
@@ -62,8 +62,8 @@ const Login: FC = () => {
                         type="submit"
                         disabled={isLoading}
                         className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-sm font-medium text-white transition-colors ${isLoading
-                                ? 'bg-indigo-400 cursor-not-allowed'
-                                : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
+                            ? 'bg-indigo-400 cursor-not-allowed'
+                            : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
                             }`}
                     >
                         {isLoading ? (
