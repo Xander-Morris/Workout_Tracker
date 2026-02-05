@@ -41,9 +41,9 @@ async def SignUp(request: Request, user: models.UserCreate, response: Response):
     if not auth_helper.IsPasswordStrong(user.password):
         raise APIError.validation_error(ErrorMessage.PASSWORD_WEAK)
     
-    response = emailable_client.verify(email=user.email)
+    emailable_result = emailable_client.verify(email=user.email)
 
-    if response['state'] != 'deliverable':
+    if emailable_result['state'] != 'deliverable':
         raise APIError.validation_error("Email could not be validated as existing.")
 
     hashed_password = auth_helper.GetPasswordHash(user.password)
