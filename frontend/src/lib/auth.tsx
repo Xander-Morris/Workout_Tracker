@@ -6,7 +6,7 @@ import { apiClient, unauthenticatedClient } from "./apiclient";
 
 interface AuthProviderProps {
   children: ReactNode;
-}
+} 
 
 interface AuthContextType {
   user: User | null;
@@ -25,7 +25,7 @@ interface AuthContextType {
 const isAuthenticatedDefault = () => {
   const accessToken = localStorage.getItem("access_token");
 
-  return !!accessToken;
+  return accessToken !== null;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -55,9 +55,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setErrors({});
   }, [location.pathname]);
 
-  const isAuthenticated = () => {
-    return !!localStorage.getItem("access_token");
-  };
+  const isAuthenticated = () => isAuthenticatedDefault();
 
   const parseJwt = (token: string): any => {
     try {
@@ -151,8 +149,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const password: string = formData["password"];
       const request_data = { email, username, password };
       const response = await unauthenticatedClient.post("/auth/signup", request_data);
-
-      console.log(response);
 
       if (response && response.data?.message) {
         Notifications.showSuccess(response.data?.message);

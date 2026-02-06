@@ -1,4 +1,20 @@
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../lib/auth';
+
 const CheckInboxPage = () => {
+    const navigate = useNavigate();
+    const { user, accessToken } = useAuth();
+
+    useEffect(() => {
+        console.log(user);
+        console.log(accessToken);
+        
+        if (user || accessToken) {
+            navigate('/workouts');
+        }
+    }, [user, accessToken, navigate]);
+
     return (
         <div className="background-primary flex items-center justify-center">
             <div className="max-w-md w-full space-y-8">
