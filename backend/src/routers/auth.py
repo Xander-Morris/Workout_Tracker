@@ -120,6 +120,9 @@ async def ResetPasswordRequest(request: Request, reset_password_model: models.Re
     if verified_user.get("reset_password_token") != reset_password_model.token:
         raise APIError.unauthorized("Invalid verification token")
     
+    if not auth_helper.IsPasswordStrong(reset_password_model.password):
+        raise APIError.validation_error(ErrorMessage.PASSWORD_WEAK)
+    
     hashed_password = auth_helper.GetPasswordHash(reset_password_model.password)
     user_methods.resetPassword(reset_password_model.email, hashed_password)
     user_id = user_methods.GetUserIdByEmail(reset_password_model.email)

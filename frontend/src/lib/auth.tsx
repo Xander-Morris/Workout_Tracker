@@ -150,7 +150,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }
 
   const login = async (formData: any) => {
-    if (!validateForm(formData)) return;
+    if (Object.keys(errors).length > 0 || !validateForm(formData)) return;
     setIsLoading(true);
 
     try {
@@ -207,6 +207,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }
 
   const resetPassword = async(email: string, token: string, password: string) => {
+    if (Object.keys(errors).length > 0) { return; }
+
     try {
       const request_data = { email, token, password };
       const response = await unauthenticatedClient.post("/auth/reset-password", request_data);
@@ -223,7 +225,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }
 
   const signup = async (formData: any) => {
-    if (!validateForm(formData)) return;
+    if (Object.keys(errors).length > 0 || !validateForm(formData)) return;
     setIsLoading(true);
 
     try {
