@@ -51,19 +51,6 @@ async def SignUp(request: Request, user: models.UserCreate, response: Response):
     
     return {"message": "Signup successful! Check your email to verify your account."}
 
-    """hashed_password = auth_helper.GetPasswordHash(user.password)
-    user_id = user_methods.CreateUser(user.email, user.username, hashed_password)
-    device_fingerprint = auth_helper.GenerateDeviceFingerprint(request)
-    access_token, refresh_token = auth_helper.CreateTokenPair(user_id, user.email, 
-                                                            username=user.username, device_fingerprint=device_fingerprint)
-    
-    ResponseSetCookieHelper(response, refresh_token)
-    
-    return models.TokenResponse(
-        access_token=access_token,
-        token_type="bearer"
-    )"""
-
 @router.post("/authenticate", response_model=models.TokenResponse, status_code=status.HTTP_200_OK)
 @limiter.limit("10/minute")
 async def VerifyUser(request: Request, auth_request_user: models.AuthRequestUser, response: Response):
