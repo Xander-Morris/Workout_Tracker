@@ -195,7 +195,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       if (response.status === 200) {
         Notifications.showSuccess("You reset your password!");
-        navigate('/workouts', { replace: true });
+        navigate('/login', { replace: true });
       } else {
         Notifications.showError("The email sending failed. Please try again.");
       }
