@@ -194,7 +194,7 @@ def StoreRefreshToken(user_id: str, token_hash: str, expires_at: datetime, email
     refresh_tokens = GetDb()["refresh_tokens"]
 
     # This is just to ensure that no user has multiple refresh tokens at a given time.
-    refresh_tokens.delete_many({"user_id": user_id, "email": email})
+    RevokeAllUserRefreshTokens(user_id)
 
     result = refresh_tokens.insert_one({
         "user_id": user_id,
