@@ -114,11 +114,17 @@ def resetPassword(email: str, hashed_password: str) -> None:
 
     if not user:
         return None
-    
+
     users.update_one(
         {"email": email}, 
-        {"$set": {"password": hashed_password}},
-        {"$unset": {"reset_password_token": ""}}
+        {
+            "$set": {
+                "password": hashed_password,
+            },
+            "$unset": {
+                "reset_password_token": "",
+            },
+        }
     )
 
 def CreateUser(email: str, username: str, hashed_password: str, verification_token: str | None = None) -> str:
