@@ -121,7 +121,7 @@ async def ResetPasswordRequest(request: Request, reset_password_model: models.Re
         raise APIError.unauthorized("Invalid verification token")
     
     hashed_password = auth_helper.GetPasswordHash(reset_password_model.password)
-    user_methods.setNewHashedPassword(reset_password_model.email, hashed_password)
+    user_methods.resetPassword(reset_password_model.email, hashed_password)
     user_id = user_methods.GetUserIdByEmail(reset_password_model.email)
     
     return models.TokenResponse(

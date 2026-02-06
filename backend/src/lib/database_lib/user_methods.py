@@ -80,15 +80,6 @@ def IsUserInUsersCollection(users_collection, email: str | None = None, username
         
     return False
 
-def setResetPasswordToken(email: str, token: str) -> None:
-    users = GetDb()["users"]
-    user = users.find_one({"email": email})
-
-    if not user:
-        return None 
-
-    users.update_one({"email": email}, {"$set": {"reset_password_token": token}})
-
 def DoesPendingUserExist(email: str | None = None, username: str | None = None) -> bool:
     pending_users = GetDb()["pending_users"]
 
@@ -108,14 +99,27 @@ def DeletePendingUserByEmail(email: str) -> None:
     pending_users = GetDb()["pending_users"]
     pending_users.delete_one({"email": email})
 
-def setNewHashedPassword(email: str, hashed_password: str) -> None:
+def setResetPasswordToken(email: str, token: str) -> None:
+    users = GetDb()["users"]
+    user = users.find_one({"email": email})
+
+    if not user:
+        return None 
+
+    users.update_one({"email": email}, {"$set": {"reset_password_token": token}})
+
+def resetPassword(email: str, hashed_password: str) -> None:
     users = GetDb()["users"]
     user = users.find_one({"email": email})
 
     if not user:
         return None
     
-    users.update_one({"email": email}, {"$set": {"password": hashed_password}})
+    users.update_one(
+        {"email": email}, 
+        {"$set": {"password": hashed_password}},
+        {"$unset": {"reset_password_token": ""}}
+    )
 
 def CreateUser(email: str, username: str, hashed_password: str, verification_token: str | None = None) -> str:
     if verification_token and DoesPendingUserExist(email, username):

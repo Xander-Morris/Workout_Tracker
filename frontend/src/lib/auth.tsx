@@ -194,7 +194,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const response = await unauthenticatedClient.post("/auth/reset-password", request_data);
 
       if (response.status === 200) {
-        Notifications.showSuccess(response.data?.message);
+        Notifications.showSuccess("You reset your password!");
         navigate('/workouts', { replace: true });
       } else {
         Notifications.showError("The email sending failed. Please try again.");
