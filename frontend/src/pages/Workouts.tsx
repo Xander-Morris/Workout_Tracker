@@ -9,7 +9,6 @@ import { DatesLibrary } from '../lib/dates';
 import { Notifications } from '../lib/notifications';
 import { ListedWorkout } from '../components/listed_workout';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useMemo } from "react";
 
 interface WorkoutFormData {
   name: string;
@@ -163,17 +162,17 @@ const Workouts: FC = () => {
     });
   };
 
-  const getWorkoutsForDate = useMemo(() => {
+  const getWorkoutsForDate = (date: Date) => {
     return workouts.filter((workout: Workout) => {
       const workoutDate = new Date(workout.scheduled_date);
-
+      
       return (
-        workoutDate.getFullYear() === selectedDate.getFullYear() &&
-        workoutDate.getMonth() === selectedDate.getMonth() &&
-        workoutDate.getDate() === selectedDate.getDate()
+        workoutDate.getFullYear() === date.getFullYear() &&
+        workoutDate.getMonth() === date.getMonth() &&
+        workoutDate.getDate() === date.getDate()
       );
     });
-  }, [workouts, selectedDate]);
+  };
 
   const changeDayOrMonth = (is_day: boolean, offset: number) => {
     const newDate = new Date(selectedDate);
