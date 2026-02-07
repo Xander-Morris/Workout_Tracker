@@ -86,9 +86,9 @@ const Workouts: FC = () => {
 
   const deleteWorkoutMutation = useMutation({
     mutationFn: (workoutId: string) => apiClient.delete(`/workouts/${workoutId}`).then(res => res.data),
-    onSuccess: () => {
+    onSuccess: (_, workoutId) => {
       queryClient.setQueryData<Workout[]>(["workouts"], (oldWorkouts = []) =>
-        oldWorkouts.filter((workout) => workout.id !== editingId)
+        oldWorkouts.filter((workout) => workout.id !== workoutId)
       );
       setEditingId(null);
       Notifications.showSuccess("Workout deleted successfully!");
@@ -165,7 +165,7 @@ const Workouts: FC = () => {
   const getWorkoutsForDate = (date: Date) => {
     return workouts.filter((workout: Workout) => {
       const workoutDate = new Date(workout.scheduled_date);
-      
+
       return (
         workoutDate.getFullYear() === date.getFullYear() &&
         workoutDate.getMonth() === date.getMonth() &&
