@@ -46,11 +46,6 @@ class WorkoutResponse(WorkoutCreate):
         }
     }
 
-class WorkoutsThatContainExerciseReport(BaseModel):
-    exercise: str
-    workouts: List[WorkoutResponse]
-    model_config = {"from_attributes": True}
-
 class WorkoutUpdate(BaseModel):
     name: str
     scheduled_date: Optional[AwareDatetime] = None
@@ -60,9 +55,6 @@ class WorkoutUpdate(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
-
-class AllExercisesReport(BaseModel):
-    exercises: List[str]
 
 class ExerciseRequest(BaseModel):
     exercise: str

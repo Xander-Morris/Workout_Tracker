@@ -88,20 +88,6 @@ def GetNumberOfWorkoutsForUserOnDate(user_id: str, date: datetime) -> int:
     
     return count
 
-def GetAllExercisesForUser(user_id: str) -> List[str]:
-    workouts = GetDb()["workouts"]
-    pipeline = [
-        {"$match": {"user_id": user_id}},
-        {"$unwind": "$exercises"},
-        {"$group": {"_id": "$exercises.name"}},
-        {"$sort": {"_id": 1}}
-    ]
-    
-    cursor = workouts.aggregate(pipeline)
-    exercises = [doc["_id"] for doc in cursor]
-    
-    return exercises
-
 def GetWorkoutsThatContainExercise(user_id: str, exercise_name: str, start_date: datetime | None = None, end_date: datetime | None = None, ascending_sort: bool = False) -> List[Dict]:
     results = []
     workouts = GetDb()["workouts"]

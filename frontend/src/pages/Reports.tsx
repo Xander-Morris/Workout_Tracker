@@ -9,6 +9,7 @@ import { CalendarPicker } from "../components/calendar_picker";
 import { DatesLibrary } from "../lib/dates";
 import { Notifications } from "../lib/notifications";
 import { Graph, type GraphPoint, defaultGraphData } from "../components/graph";
+import { useWorkouts } from '../contexts/workouts';
 
 const Reports: FC = () => {
     type STATUS_TYPE = "none" | "loading" | "error" | "success";
@@ -19,7 +20,7 @@ const Reports: FC = () => {
     const [exercises, setExercises] = useState<string[]>([]);
     const [selectedExercise, setSelectedExercise] = useState("");
     const [status, setStatus] = useState<STATUS_TYPE>("none");
-    const [workouts, setWorkouts] = useState<Workout[]>([]);
+    const [containsWorkouts, setContainsWorkouts] = useState<Workout[]>([]);
     const [startDate, setStartDate] = useState<Date>(new Date());
     const [endDate, setEndDate] = useState<Date>(new Date());
     const [volumeReportTotal, setVolumeReportTotal] = useState<number | null>(null);
@@ -30,38 +31,44 @@ const Reports: FC = () => {
     const [showEndDatePicker, setShowEndDatePicker] = useState(false);
     const [graphData, setGraphData] = useState<GraphPoint[]>(defaultGraphData);
 
+    const workouts = useWorkouts();
+
     const setReportTypeToContains = () => setReportType("contains");
     const setReportTypeToVolume = () => setReportType("volume");
     const setReportTypeTo1RM = () => setReportType("1rm");
 
-    const fetchAllExercises = async () => {
-        try {
-            const response = await apiClient.get("/reports/exercises");
-            setExercises(response.data.exercises);
-        } catch (error) {
-            console.error("Error fetching exercises report:", error);
-        }
-    };
+    const fetchAllExercises = () => {
+        const exerciseSet = new Set<string>();
 
-    const fetchWorkoutsWithSelectedExercise = async () => {
+        workouts.forEach(workout => {
+            workout.exercises.forEach(exercise => {
+                exerciseSet.add(exercise.name);
+            });
+        });
+
+        setExercises(Array.from(exerciseSet));
+    }
+
+    const fetchWorkoutsWithSelectedExercise = () => {
         if (!selectedExercise) {
-            setWorkouts([]);
+            setContainsWorkouts([]);
             setStatus("none");
             return;
         }
 
-        try {
-            setStatus("loading");
-            const response = await apiClient.post("/reports/contains", {
-                exercise: selectedExercise,
-            });
-            setWorkouts(response.data.workouts);
-            setStatus("success");
-        } catch (error) {
-            setWorkouts([]);
-            setStatus("error");
-        }
-    };
+        const newContains = workouts.filter((workout) => {
+            for (let exercise of workout.exercises) {
+                if (exercise.name == selectedExercise) {
+                    return true;
+                }
+            }
+
+            return false;
+        })
+
+        setContainsWorkouts(newContains);
+        setStatus("success");
+    }
 
     const handleToggle = (exercise: string) => {
         const isDeselecting = selectedExercise === exercise;
@@ -83,7 +90,7 @@ const Reports: FC = () => {
 
     useEffect(() => {
         setSelectedExercise("");
-        setWorkouts([]);
+        setContainsWorkouts([]);
         setStatus("none");
         setDropdownVisible(false);
         setStartDate(new Date());
@@ -311,7 +318,7 @@ const Reports: FC = () => {
                                             </h2>
 
                                             <ul className="space-y-4">
-                                                {workouts.map(workout => (
+                                                {containsWorkouts.map(workout => (
                                                     <ListedWorkout
                                                         workout={workout}
                                                         expandedId={expandedId}

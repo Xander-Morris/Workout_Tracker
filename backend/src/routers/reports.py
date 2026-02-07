@@ -8,41 +8,6 @@ from lib.misc.error_handler import APIError, ErrorMessage
 
 router = APIRouter(tags=["reports"], prefix="/reports")
 
-# ALL EXERCISES EVER LOGGED
-@router.get("/exercises", response_model=models.AllExercisesReport)
-@limiter.limit("20/minute")
-async def GetAllExercisesReport(
-    request: Request, current_user = Depends(auth_helper.GetCurrentUser)
-):
-    exercises = workout_methods.GetAllExercisesForUser(current_user.user_id)
-
-    return models.AllExercisesReport(
-        exercises=exercises
-    )
-
-# CONTAINS EXERCISE
-@router.post("/contains", response_model=models.WorkoutsThatContainExerciseReport)
-@limiter.limit("20/minute")
-async def GetReport(
-    request: Request,
-    payload : models.ExerciseRequest,
-    current_user = Depends(auth_helper.GetCurrentUser)
-):
-    exercise = payload.exercise.strip()
-
-    if not exercise.strip():
-        raise APIError.validation_error(ErrorMessage.EMPTY_INPUT)
-
-    workouts = workout_methods.GetWorkoutsThatContainExercise(current_user.user_id, exercise)
-
-    if not workouts or len(workouts) <= 0:
-        raise APIError.not_found("Workouts")
-    
-    return models.WorkoutsThatContainExerciseReport(
-        exercise=exercise,
-        workouts=[models.WorkoutResponse(**w) for w in workouts]
-    )   
-
 # VOLUME OVER PERIOD
 @router.post("/volume", response_model=models.VolumeOverPeriodReport)
 @limiter.limit("10/minute")
