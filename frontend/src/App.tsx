@@ -23,12 +23,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 function Layout() {
   return (
     <AuthProvider>
-      <WorkoutsProvider>
-        <Outlet />
-        <Toaster toastOptions={{
-            duration: 4500, 
-          }} />
-      </WorkoutsProvider>
+      <Outlet />
+      <Toaster toastOptions={{
+          duration: 4500, 
+        }} />
     </AuthProvider>
   )
 }
@@ -66,11 +64,15 @@ function App() {
           path: "/login",
           element: <Login />,
         },
+        // Only workouts and reports need the WorkoutsProvider, so we wrap them individually in the router.
+        // Otherwise, it would cause unnecessary rendering of the workouts context for pages that don't need it, like settings.
         {
           path: "/workouts",
           element: (
             <ProtectedRoute>
-              <Workouts />
+              <WorkoutsProvider>
+                <Workouts />
+              </WorkoutsProvider>
             </ProtectedRoute>
           ),
         },
@@ -78,7 +80,9 @@ function App() {
           path: "/reports",
           element: (
             <ProtectedRoute>
-              <Reports />
+              <WorkoutsProvider>
+                <Reports />
+              </WorkoutsProvider>
             </ProtectedRoute>
           ),
         },

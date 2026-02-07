@@ -1,6 +1,7 @@
 import { createContext, useContext, type FC, type ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../lib/apiclient';
+import { useMemo } from 'react';
 
 interface WorkoutsProviderProps {
   children: ReactNode;
@@ -17,8 +18,10 @@ export const WorkoutsProvider: FC<WorkoutsProviderProps> = ({ children }) => {
     },
   });
 
+  const value = useMemo(() => workouts, [workouts]);
+
   return (
-    <WorkoutsContext.Provider value={workouts}>
+    <WorkoutsContext.Provider value={value}>
       {children}
     </WorkoutsContext.Provider>
   );
