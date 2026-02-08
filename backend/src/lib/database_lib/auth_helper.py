@@ -8,7 +8,7 @@ import datetime
 import hashlib
 import config 
 import secrets
-import emails
+from lib.misc import emails
 
 SECRET_KEY = config.SECRET_KEY
 ph = PasswordHasher()
