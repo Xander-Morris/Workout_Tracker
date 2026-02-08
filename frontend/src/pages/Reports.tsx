@@ -166,7 +166,7 @@ const Reports: FC = () => {
         }
 
         const inPeriod = getWorkoutsInPeriod();
-        const perDay: {[date: string]: number} = {};
+        let perDay: {[date: string]: number} = {};
         let total: number = 0; // For the volume reports.
 
         for (const entry of inPeriod) {
@@ -197,6 +197,8 @@ const Reports: FC = () => {
                 }
             }
         }
+
+        perDay = Object.fromEntries(Object.entries(perDay).reverse());
 
         if (isVolume) {
             setVolumeReportTotal(total);

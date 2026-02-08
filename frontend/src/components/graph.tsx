@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import { Line, LineChart, XAxis, YAxis, ResponsiveContainer } from 'recharts';
+import { Line, LineChart, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
 
 const calculateChartHeight = (dataLength: number) => {
     // Base height: 320px, add 15px for each data point to accommodate rotated labels
@@ -47,6 +47,21 @@ export const Graph: FC<Props> = ({
     graphData,
     headerText
 }) => {
+    const CustomTooltip = ({ active, payload }: any) => {
+        if (active && payload && payload.length) {
+            const { name, amount } = payload[0].payload;
+
+            return (
+                <div className="bg-white-600 text-black p-1 rounded shadow">
+                    <p className="font-bold text-shadow-lg">{name}</p>
+                    <p>Amount: <p className="font-bold text-white text-shadow-lg">{amount}</p></p>
+                </div>
+            );
+        }
+
+        return null;
+    }
+
     return (
         <div className="mt-8 w-100 px-4 flex flex-col items-center space-y-4">
             <h2 className="text-xl font-semibold text-white-600">
@@ -81,6 +96,8 @@ export const Graph: FC<Props> = ({
                         strokeWidth={2}
                         dot={{ fill: "#ffffff" }}
                     />
+
+                    <Tooltip trigger="click" content={<CustomTooltip />} />
                 </LineChart>
             </ResponsiveContainer>
         </div>
