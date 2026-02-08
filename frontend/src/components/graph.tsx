@@ -14,6 +14,7 @@ export type GraphPoint = {
 type Props = {
     graphData: GraphPoint[];
     headerText: string;
+    tooltipText: string;
 }
 
 type CustomTickProps = {
@@ -45,7 +46,8 @@ const CustomXAxisTick: FC<CustomTickProps> = ({ x = 0, y = 0, payload }) => {
 
 export const Graph: FC<Props> = ({
     graphData,
-    headerText
+    headerText,
+    tooltipText,
 }) => {
     const CustomTooltip = ({ active, payload }: any) => {
         if (active && payload && payload.length) {
@@ -54,7 +56,7 @@ export const Graph: FC<Props> = ({
             return (
                 <div className="bg-white-600 text-black p-1 rounded shadow">
                     <p className="font-bold text-shadow-lg">{name}</p>
-                    <p>Amount: <p className="font-bold text-white text-shadow-lg">{amount}</p></p>
+                    <p>{tooltipText}: <p className="font-bold text-white text-shadow-lg">{amount}</p></p>
                 </div>
             );
         }

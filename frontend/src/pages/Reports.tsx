@@ -180,7 +180,7 @@ const Reports: FC = () => {
                         continue;
                     }
 
-                    const toAdd: number = (exercise.sets * exercise.reps) * (exercise.weight || 0);
+                    const toAdd: number = Math.floor((exercise.sets * exercise.reps) * (exercise.weight || 0));
                     perDay[key] += toAdd;
                     total += toAdd;
                 }
@@ -193,7 +193,7 @@ const Reports: FC = () => {
 
                     // Epley formula
                     const weight: number = exercise.weight || 0;
-                    perDay[key] = weight * (1 + (exercise.reps / 30));
+                    perDay[key] = Math.floor(weight * (1 + (exercise.reps / 30)));
                 }
             }
         }
@@ -380,7 +380,11 @@ const Reports: FC = () => {
                                     Generate Report
                                 </button>
                                 {volumeReportTotal !== null && !isEqual(graphData, defaultGraphData) && (
-                                    <Graph headerText={`Total volume ${volumeReportExerciseName ? `for ${volumeReportExerciseName}` : "for all exercises"}: ${volumeReportTotal.toLocaleString()}`} graphData={graphData} />
+                                    <Graph 
+                                        headerText={`Total volume ${volumeReportExerciseName ? `for ${volumeReportExerciseName}` : "for all exercises"}: ${volumeReportTotal.toLocaleString()}`} 
+                                        graphData={graphData}
+                                        tooltipText={"Volume"}
+                                    />
                                 )}
                             </div>
                         </div>
@@ -399,7 +403,11 @@ const Reports: FC = () => {
                                     Generate Report
                                 </button>
                                 {oneRepMaxExercise !== "" && !isEqual(graphData, defaultGraphData) && (
-                                    <Graph headerText={`1RM over time for ${oneRepMaxExercise}:`} graphData={graphData} />
+                                    <Graph 
+                                        headerText={`1RM over time for ${oneRepMaxExercise}:`} 
+                                        graphData={graphData}
+                                        tooltipText={"1RM"}
+                                    />
                                 )}
                             </div>
                         </div>
