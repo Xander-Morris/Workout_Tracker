@@ -6,9 +6,9 @@ import pytest
 grandparent_dir = Path(__file__).resolve().parents[1]
 sys.path.append(str(grandparent_dir))
 
-import backend.api as api # This import has to be right here.
+import backend.src.app as app # This import has to be right here.
 
-client = TestClient(api.app)
+client = TestClient(app.app)
 
 @pytest.mark.skip(reason="Not needed right now.")
 def test_signup():

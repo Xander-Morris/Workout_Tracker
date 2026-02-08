@@ -72,6 +72,16 @@ def GetWorkoutsForUser(user_id: str,
     
     return results
 
+def GetWorkoutById(workout_id: str, user_id: str) -> Optional[Dict]:
+    workouts = GetDb()["workouts"]
+    workout = workouts.find_one({"_id": ObjectId(workout_id), "user_id": user_id})
+
+    if workout:
+        workout = MakeDatetimeAware(workout)
+        workout["id"] = str(workout["_id"]) 
+
+    return workout
+
 def GetNumberOfWorkoutsForUserOnDate(user_id: str, date: datetime) -> int:
     workouts = GetDb()["workouts"]
     
@@ -87,63 +97,3 @@ def GetNumberOfWorkoutsForUserOnDate(user_id: str, date: datetime) -> int:
     })
     
     return count
-
-def GetWorkoutsThatContainExercise(user_id: str, exercise_name: str, start_date: datetime | None = None, end_date: datetime | None = None, ascending_sort: bool = False) -> List[Dict]:
-    results = []
-    workouts = GetDb()["workouts"]
-    cursor = None
-    sort_option = pymongo.ASCENDING if ascending_sort else pymongo.DESCENDING
-
-    if not start_date or not end_date:
-        cursor = workouts.find({
-            "user_id": user_id,
-            "exercises.name": exercise_name,
-        }).sort("scheduled_date", sort_option)
-    else:
-        cursor = workouts.find({
-            "user_id": user_id,
-            "exercises.name": exercise_name,
-            "scheduled_date": {
-                "$gte": start_date,
-                "$lte": end_date
-            },
-        }).sort("scheduled_date", sort_option)
-    
-    for workout in cursor:
-        workout = MakeDatetimeAware(workout)
-        workout["id"] = str(workout["_id"])
-        results.append(workout)
-    
-    return results
-
-def GetAllWorkoutsInPeriod(user_id: str, start_date: datetime, end_date: datetime, ascending_sort: bool = False) -> List[Dict]:
-    workouts = GetDb()["workouts"]
-    sort_option = pymongo.ASCENDING if ascending_sort else pymongo.DESCENDING
-    cursor = workouts.find({
-        "user_id": user_id,
-        "scheduled_date": {
-            "$gte": start_date,
-            "$lte": end_date
-        }
-    }).sort("scheduled_date", sort_option)
-
-    results = []
-
-    for doc in cursor:
-        doc = MakeDatetimeAware(doc)
-        doc["id"] = str(doc["_id"])
-        del doc["_id"] 
-        
-        results.append(doc)
-    
-    return results
-
-def GetWorkoutById(workout_id: str, user_id: str) -> Optional[Dict]:
-    workouts = GetDb()["workouts"]
-    workout = workouts.find_one({"_id": ObjectId(workout_id), "user_id": user_id})
-
-    if workout:
-        workout = MakeDatetimeAware(workout)
-        workout["id"] = str(workout["_id"]) 
-
-    return workout

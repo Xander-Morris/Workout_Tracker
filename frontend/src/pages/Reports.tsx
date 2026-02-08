@@ -24,7 +24,7 @@ const Reports: FC = () => {
     const [startDate, setStartDate] = useState<Date>(new Date());
     const [endDate, setEndDate] = useState<Date>(new Date());
     const [volumeReportTotal, setVolumeReportTotal] = useState<number | null>(null);
-    const [volumeReportExercise, setVolumeReportExercise] = useState<string | null>(null);
+    const [volumeReportExerciseName, setVolumeReportExerciseName] = useState<string | null>(null);
     const [oneRepMaxExercise, setOneRepMaxExercise] = useState("");
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [showStartDatePicker, setShowStartDatePicker] = useState(false);
@@ -87,7 +87,7 @@ const Reports: FC = () => {
         setStartDate(new Date());
         setEndDate(new Date());
         setVolumeReportTotal(null);
-        setVolumeReportExercise(null);
+        setVolumeReportExerciseName(null);
         setGraphData(defaultGraphData);
     }, [reportType]);
 
@@ -166,52 +166,59 @@ const Reports: FC = () => {
             return;
         }
 
-        // I left off here, continue tomorrow to finish this up to remove the calls to the backend. 
-        // Ensure that dates are accounted for correctly, and that the general functioning of the reports is still correct after
-        // converting it all to the frontend only. 
         const inPeriod = getWorkoutsInPeriod();
-        const perDay = {};
-        const total = 0; // For the volume reports.
+        const perDay: {[date: string]: number} = {};
+        let total: number = 0; // For the volume reports.
 
-        for (let entry of inPeriod) {
+        for (const entry of inPeriod) {
             console.log(entry);
+            const key = entry.scheduled_date;
+            perDay[key] = 0;
 
             if (isVolume) {
-                
+                for (const exercise of entry.exercises) {
+                    if (selectedExerciseName !== null && selectedExerciseName !== "" && exercise.name != selectedExerciseName) {
+                        continue;
+                    }
+
+                    const toAdd: number = (exercise.sets * exercise.reps) * (exercise.weight || 0);
+                    perDay[key] += toAdd;
+                    total += toAdd;
+                }
+            } else {
+                for (const exercise of entry.exercises) {
+                    // The one rep max one requires a selected exercise. 
+                    if (exercise.name != selectedExerciseName) {
+                        continue;
+                    }
+
+                    // Epley formula
+                    const weight: number = exercise.weight || 0;
+                    perDay[key] = weight * (1 + (exercise.reps / 30));
+                }
             }
         }
-        
-        const endpoint: string = isVolume ? "/reports/volume" : "/reports/onerepmax";
-        apiClient.post(endpoint, {
-            start_date: DatesLibrary.convertDateToYMD(startDate),
-            end_date: DatesLibrary.convertDateToYMD(endDate),
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            exercise: selectedExerciseName || null,
-        }).then(response => {
-            if (isVolume) {
-                setVolumeReportTotal(response.data.total_volume);
-                setVolumeReportExercise(response.data.exercise || null);
-            } else {
-                setOneRepMaxExercise(response.data.exercise || "");
-            }
 
-            const per_day = response.data.per_day;
+        if (isVolume) {
+            setVolumeReportTotal(total);
+            setVolumeReportExerciseName(selectedExerciseName);
+        } else {
+            setOneRepMaxExercise(selectedExerciseName || "");
+        }
 
-            // It is possible to not return anything.
-            if (!per_day) {
-                setGraphData(defaultGraphData);
-                return;
-            }
+        if (perDay.length === 0) {
+            setGraphData(defaultGraphData);
+            return;
+        }
 
-            const new_graph_data: GraphPoint[] = Object.entries(per_day).map(
-                ([day, amt]) => ({
-                    name: DatesLibrary.formatDateToLocaleDateString(day, true, true),
-                    amount: amt as number,
-                })
-            );
+        const new_graph_data: GraphPoint[] = Object.entries(perDay).map(
+            ([day, amt]) => ({
+                name: DatesLibrary.formatDateToLocaleDateString(day, true, true),
+                amount: amt as number,
+            })
+        );
 
-            setGraphData(new_graph_data);
-        });
+        setGraphData(new_graph_data);
     }
 
     const generateVolumeReport = () => {
@@ -372,7 +379,7 @@ const Reports: FC = () => {
                                     Generate Report
                                 </button>
                                 {volumeReportTotal !== null && !isEqual(graphData, defaultGraphData) && (
-                                    <Graph headerText={`Total volume ${volumeReportExercise ? `for ${volumeReportExercise}` : "for all exercises"}: ${volumeReportTotal.toLocaleString()}`} graphData={graphData} />
+                                    <Graph headerText={`Total volume ${volumeReportExerciseName ? `for ${volumeReportExerciseName}` : "for all exercises"}: ${volumeReportTotal.toLocaleString()}`} graphData={graphData} />
                                 )}
                             </div>
                         </div>

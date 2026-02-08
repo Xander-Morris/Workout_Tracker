@@ -1,13 +1,12 @@
 from fastapi.testclient import TestClient
 import sys
 from pathlib import Path
-from datetime import datetime, timedelta, timezone
-import random
+from datetime import datetime, timezone
 
 grandparent_dir = Path(__file__).resolve().parents[1]
 sys.path.append(str(grandparent_dir))
 
-from backend.api import app
+from backend.src.app import app
 
 client = TestClient(app)
 
@@ -64,20 +63,6 @@ def test_full_workflow():
         )
         assert response.status_code == 200
         assert response.json()["comments"] == "Updated right after creation!"
-
-    response = client.post(f"/reports/contains", json={"exercise": "Bench Press",}, headers=headers)
-    assert response.status_code == 200
-    print(response.json())
-
-    # Total volume with no exercise filter.
-    response = client.post(f"/reports/volume", json={"start_date": start_date, "end_date": datetime.now(timezone.utc).isoformat(), "exercise": ""}, headers=headers)
-    assert response.status_code == 200
-    print(response.json())
-
-    # Total volume with exercise filter.
-    response = client.post(f"/reports/volume", json={"start_date": start_date, "end_date": datetime.now(timezone.utc).isoformat(), "exercise": "Bench Press"}, headers=headers)
-    assert response.status_code == 200
-    print(response.json())
 
     response = client.get(f"/workouts/", headers=headers)
     assert response.status_code == 200
