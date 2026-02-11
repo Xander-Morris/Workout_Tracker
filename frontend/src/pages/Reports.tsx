@@ -72,11 +72,11 @@ const Reports: FC = () => {
 
     useEffect(() => {
         fetchAllExercises();
-    }, []);
+    }, [workouts]);
 
     useEffect(() => {
         fetchWorkoutsWithSelectedExerciseName();
-    }, [selectedExerciseName]);
+    }, [workouts, selectedExerciseName]);
 
     useEffect(() => {
         setSelectedExerciseName("");
