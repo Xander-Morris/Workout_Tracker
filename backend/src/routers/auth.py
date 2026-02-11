@@ -110,6 +110,9 @@ async def InitialResetPasswordRequest(request: Request, reset_password_model: mo
     if not verified_user:
         raise APIError.conflict("Could not find account for that email")
     
+    if user_methods.UserHasResetPasswordToken(reset_password_model.email):
+        raise APIError.conflict("A reset password email has already been sent. Please check your email or try again later.")
+
     success = auth_helper.InitiateResetPassword(reset_password_model.email)
 
     if not success:

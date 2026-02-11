@@ -155,6 +155,22 @@ def StorePasswordResetToken(user_id: ObjectId) -> str:
 
     return raw_token
 
+def UserHasResetPasswordToken(email: str) -> bool:
+    user = GetVerifiedUserByEmail(email)
+
+    if not user:
+        return False
+
+    user_id = user["_id"]
+
+    collection = GetDb()["password_reset_tokens"]
+    token = collection.find_one({
+        "user_id": user_id,
+        "expires_at": {"$gt": datetime.now(timezone.utc)}
+    })
+
+    return token is not None
+
 def ResetPassword(user_id: ObjectId, hashed_password: str) -> None:
     users = GetDb()["users"]
 
@@ -297,7 +313,7 @@ def RevokeRefreshToken(token_hash: str) -> bool:
 def RevokeAllUserRefreshTokens(user_id: ObjectId) -> int:
     refresh_tokens = GetDb()["refresh_tokens"]
     result = refresh_tokens.delete_many({"user_id": user_id})
-    
+
     return result.deleted_count
 
 def ConsumeRefreshToken(token_hash: str) -> Optional[Dict]:
