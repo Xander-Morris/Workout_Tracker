@@ -122,6 +122,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const grabAccessTokenFromResponse = (response: any) => {
+    const newAccessToken = response.data.access_token;
+    setAccessToken(newAccessToken);
+    Notifications.showSuccess("Login successful!");
+    navigate('/workouts', { replace: true });
+    Notifications.showSuccess("Logged in successfully! Redirecting to workouts...");
+  }
+
   const login = async (formData: any) => {
     if (Object.keys(errors).length > 0 || !validateForm(formData)) return;
     setIsLoading(true);
@@ -131,10 +139,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const password: string = formData["password"];
       const request_data = { email_or_username, password };
       const response = await unauthenticatedClient.post("/auth/login", request_data);
-      const newAccessToken = response.data.access_token;
-      setAccessToken(newAccessToken);
-      Notifications.showSuccess("Login successful!");
-      navigate('/workouts');
+      grabAccessTokenFromResponse(response);
     } catch (error: any) {
       console.error("Login error:", error);
       Notifications.showError(error);
@@ -149,10 +154,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const response = await unauthenticatedClient.post("/auth/authenticate", request_data);
 
       if (response.status === 200) {
-        Notifications.showSuccess("Email verified successfully! Redirecting to workouts...");
-        const newAccessToken = response.data.access_token;
-        setAccessToken(newAccessToken);
-        navigate('/workouts', { replace: true });
+        grabAccessTokenFromResponse(response);
       } else {
         Notifications.showError("Verification failed. Please try again.");
       }
@@ -184,10 +186,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const response = await unauthenticatedClient.post("/auth/reset-password", request_data);
 
       if (response.status === 200) {
-        Notifications.showSuccess("You reset your password!");
-        navigate('/login', { replace: true });
+        grabAccessTokenFromResponse(response);
       } else {
-        Notifications.showError("The email sending failed. Please try again.");
+        Notifications.showError("The password reset failed. Please try again.");
       }
     } catch (error) {
       Notifications.showError(error);
@@ -208,7 +209,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (response && response.data?.message) {
         Notifications.showSuccess(response.data?.message);
         // Redirect to a new page.
-        navigate('/check-inbox');
+        navigate('/check-inbox', { replace: true });
       }
     } catch (error: any) {
       console.error("Signup error:", error);
@@ -228,7 +229,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setUser(null);
       localStorage.removeItem("access_token");
       Notifications.showSuccess("Logged out");
-      navigate('/');
+      navigate('/', { replace: true });
     }
   };
 

@@ -145,13 +145,7 @@ async def ResetPasswordRequest(
     user = user_methods.GetVerifiedUserByEmail(reset_password_model.email)
 
     return models.TokenResponse(
-        access_token=CreateAccessToken(
-            request,
-            response,
-            str(user_id), 
-            user["email"],
-            user["username"]
-        ),
+        access_token=CreateAccessToken(request, response, str(user_id), user["email"], user["username"]),
         token_type="bearer"
     )
 
@@ -172,7 +166,7 @@ async def Login(request: Request, user: models.UserLogin, response: Response):
     user_id = user_methods.GetUserIdByEmail(email)
     
     return models.TokenResponse(
-        access_token=CreateAccessToken(request, response, user_id, email, username),
+        access_token=CreateAccessToken(request, response, str(user_id), email, username),
         token_type="bearer"
     )
 
