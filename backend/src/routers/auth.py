@@ -10,7 +10,7 @@ import config
 
 router = APIRouter(tags=["auth"], prefix="/auth")
 
-def ResponseSetCookieHelper(response: Response, refresh_token: str):
+def ResponseSetCookieHelper(response: Response, refresh_token: str, device_id: str):
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
@@ -19,6 +19,14 @@ def ResponseSetCookieHelper(response: Response, refresh_token: str):
         samesite="none" if config.IS_PRODUCTION else "lax",
         path="/",
         max_age=config.REFRESH_TOKEN_DAYS * 24 * 60 * 60,
+    )
+
+    response.set_cookie(
+        key="device_id",
+        value=device_id,
+        httponly=True,
+        secure=config.IS_PRODUCTION,
+        samesite="none" if config.IS_PRODUCTION else "lax",
     )
 
 def ResponseDeleteCookieHelper(response: Response):
@@ -35,7 +43,7 @@ def CreateAccessToken(request: Request, response: Response, user_id: str, email:
         user_id, email, username=username, device_fingerprint=device_fingerprint
     )
     
-    ResponseSetCookieHelper(response, refresh_token)
+    ResponseSetCookieHelper(response, refresh_token, device_fingerprint)
 
     return access_token
 
@@ -109,26 +117,38 @@ async def InitialResetPasswordRequest(request: Request, reset_password_model: mo
     
     return {"message": "Check your email to reset your password."}
 
-@router.post("/reset-password", response_model=models.TokenResponse, status_code=status.HTTP_200_OK)
-@limiter.limit("3/minute")
-async def ResetPasswordRequest(request: Request, reset_password_model: models.ResetPasswordModel, response: Response):
-    verified_user = user_methods.GetVerifiedUserByEmail(reset_password_model.email)
+@router.post("/reset-password", response_model=models.TokenResponse)
+async def ResetPasswordRequest(
+    request: Request,
+    reset_password_model: models.ResetPasswordModel,
+    response: Response
+):
 
-    if not verified_user:
-        raise APIError.conflict("Could not find account for that email")
-    
-    if verified_user.get("reset_password_token") != reset_password_model.token:
-        raise APIError.unauthorized("Invalid verification token")
-    
     if not auth_helper.IsPasswordStrong(reset_password_model.password):
         raise APIError.validation_error(ErrorMessage.PASSWORD_WEAK)
-    
-    hashed_password = auth_helper.GetPasswordHash(reset_password_model.password)
-    user_methods.ResetPassword(reset_password_model.email, hashed_password)
-    user_id = user_methods.GetUserIdByEmail(reset_password_model.email)
-    
+
+    user_id = user_methods.ConsumePasswordResetToken(
+        reset_password_model.token
+    )
+
+    if not user_id:
+        raise APIError.unauthorized("Invalid or expired reset token")
+
+    hashed_password = auth_helper.GetPasswordHash(
+        reset_password_model.password
+    )
+
+    user_methods.ResetPassword(user_id, hashed_password)
+    user = user_methods.GetVerifiedUserByEmail(reset_password_model.email)
+
     return models.TokenResponse(
-        access_token=CreateAccessToken(request, response, user_id, reset_password_model.email, verified_user["username"]),
+        access_token=CreateAccessToken(
+            request,
+            response,
+            str(user_id), 
+            user["email"],
+            user["username"]
+        ),
         token_type="bearer"
     )
 
@@ -165,13 +185,15 @@ async def Refresh(request: Request, response: Response):
         device_fingerprint = auth_helper.GenerateDeviceFingerprint(request)
         access_token, new_refresh_token = auth_helper.RefreshAccessToken(refresh_token, device_fingerprint)
         
-        ResponseSetCookieHelper(response, new_refresh_token)
+        ResponseSetCookieHelper(response, new_refresh_token, device_fingerprint)
         
         return models.TokenResponse(
             access_token=access_token,
             token_type="bearer"
         )
     except ValueError as e:
+        ResponseDeleteCookieHelper(response)
+
         raise APIError.unauthorized(ErrorMessage.INVALID_TOKEN)
 
 @router.post("/logout", status_code=status.HTTP_200_OK)

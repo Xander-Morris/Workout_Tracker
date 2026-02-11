@@ -15,10 +15,15 @@ ph = PasswordHasher()
 ALGORITHM = "HS256"
 
 def InitiateResetPassword(email: str) -> bool:
-    token = secrets.token_urlsafe(32)
-    user_methods.SetResetPasswordToken(email, token)
+    user = user_methods.GetVerifiedUserByEmail(email)
 
-    return emails.SendResetPasswordEmail(token, email)
+    if not user:
+        return False
+
+    user_id = user["_id"] 
+    raw_token = user_methods.StorePasswordResetToken(user_id)
+
+    return emails.SendResetPasswordEmail(raw_token, email)
 
 def InitiateEmailVerification(email: str, username: str, hashed_password: str) -> bool:
     token = secrets.token_urlsafe(32)
@@ -60,11 +65,9 @@ def CreateRefreshToken() -> str:
     return raw_token, token_hash
 
 def GenerateDeviceFingerprint(request: Request) -> str:
-    user_agent = request.headers.get("user-agent", "")
-    accept_language = request.headers.get("accept-language", "")
-    fingerprint_str = f"{user_agent}|{accept_language}"
+    device_id = secrets.token_urlsafe(32)
 
-    return hashlib.sha256(fingerprint_str.encode()).hexdigest()
+    return hashlib.sha256(device_id.encode()).hexdigest()
     
 def CreateAccessToken(user_id: str, email: str, username: str) -> str:
     payload = {
@@ -80,7 +83,7 @@ def CreateAccessToken(user_id: str, email: str, username: str) -> str:
 def CreateTokenPair(user_id: str, email: str, username: str, device_fingerprint: str) -> tuple:
     access_token = CreateAccessToken(user_id, email, username)
     raw_refresh_token, refresh_token_hash = CreateRefreshToken()
-    
+
     expires_at = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=config.REFRESH_TOKEN_DAYS)
     user_methods.StoreRefreshToken(
         user_id, 
@@ -106,21 +109,22 @@ def ValidateRefreshTokenAndGetUser(raw_refresh_token: str, device_fingerprint: s
     return result
 
 def RefreshAccessToken(raw_refresh_token: str, device_fingerprint: str) -> tuple:
-    token_info = ValidateRefreshTokenAndGetUser(raw_refresh_token, device_fingerprint)
-    
-    user_id = token_info["user_id"]
-    email = token_info["email"]
-    username = token_info["username"]
-    
-    RevokeRefreshToken(raw_refresh_token)
-    
+    token_hash = hashlib.sha256(raw_refresh_token.encode()).hexdigest()
+    token_info = user_methods.ConsumeRefreshToken(token_hash)
+
+    if not token_info:
+        raise ValueError("Invalid or expired refresh token")
+
+    if token_info.get("device_fingerprint") != device_fingerprint:
+        raise ValueError("Token used from different device")
+
     new_access_token, new_refresh_token = CreateTokenPair(
-        user_id=user_id, 
-        email=email, 
-        username=username,
-        device_fingerprint=device_fingerprint, 
+        user_id=token_info["user_id"],
+        email=token_info["email"],
+        username=token_info["username"],
+        device_fingerprint=device_fingerprint,
     )
-    
+
     return new_access_token, new_refresh_token
 
 def RevokeRefreshToken(raw_refresh_token: str) -> bool:

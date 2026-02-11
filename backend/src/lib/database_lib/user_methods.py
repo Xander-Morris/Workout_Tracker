@@ -3,6 +3,9 @@ from typing import Dict, Optional
 from .database_config import GetDb
 import pymongo
 import config 
+from bson import ObjectId
+import hashlib
+import secrets
 
 INDEX_DEFINITIONS = {
     "users": [
@@ -46,6 +49,20 @@ INDEX_DEFINITIONS = {
             [("expires_at", pymongo.ASCENDING)],
             {"expireAfterSeconds": 0, "name": "refresh_tokens_expiration_ttl"}
         ),
+    ],
+    "password_reset_tokens": [
+        (
+            [("token_hash", pymongo.ASCENDING)],
+            {"unique": True, "name": "password_reset_token_unique"}
+        ),
+        (
+            [("expires_at", pymongo.ASCENDING)],
+            {"expireAfterSeconds": 0, "name": "password_reset_token_ttl"}
+        ),
+        (
+            [("user_id", pymongo.ASCENDING)],
+            {"name": "password_reset_user_id"}
+        )
     ],
 }
 
@@ -96,33 +113,61 @@ def DeletePendingUserByEmail(email: str) -> None:
     pending_users = GetDb()["pending_users"]
     pending_users.delete_one({"email": email})
 
-def SetResetPasswordToken(email: str, token: str) -> None:
+def GetPasswordResetToken(token_hash: str):
+    collection = GetDb()["password_reset_tokens"]
+
+    return collection.find_one({
+        "token_hash": token_hash,
+        "expires_at": {"$gt": datetime.now(timezone.utc)}
+    })
+
+def ConsumePasswordResetToken(raw_token: str) -> Optional[ObjectId]:
+    collection = GetDb()["password_reset_tokens"]
+
+    token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
+
+    token = collection.find_one_and_delete({
+        "token_hash": token_hash,
+        "expires_at": {"$gt": datetime.now(timezone.utc)}
+    })
+
+    if not token:
+        return None
+
+    return token["user_id"] 
+
+def StorePasswordResetToken(user_id: ObjectId) -> str:
+    collection = GetDb()["password_reset_tokens"]
+
+    raw_token = secrets.token_urlsafe(32)
+    token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
+
+    collection.delete_many({"user_id": user_id})
+
+    collection.insert_one({
+        "user_id": user_id,
+        "token_hash": token_hash,
+        "expires_at": datetime.now(timezone.utc) + timedelta(
+            minutes=config.LINK_EXPIRATION_MINUTES
+        ),
+        "created_at": datetime.now(timezone.utc)
+    })
+
+    return raw_token
+
+def ResetPassword(user_id: ObjectId, hashed_password: str) -> None:
     users = GetDb()["users"]
-    user = users.find_one({"email": email})
 
-    if not user:
-        return None 
-
-    users.update_one({"email": email}, {"$set": {"reset_password_token": token}})
-
-def ResetPassword(email: str, hashed_password: str) -> None:
-    users = GetDb()["users"]
-    user = users.find_one({"email": email})
-
-    if not user:
-        raise ValueError(f"User does not exist for email ${email}!")
-
-    users.update_one(
-        {"email": email}, 
-        {
-            "$set": {
-                "password": hashed_password,
-            },
-            "$unset": {
-                "reset_password_token": "",
-            },
-        }
+    result = users.update_one(
+        {"_id": user_id},
+        {"$set": {"password": hashed_password}}
     )
+
+    if result.matched_count == 0:
+        raise ValueError("User not found")
+
+    # Revoke all refresh tokens
+    RevokeAllUserRefreshTokens(user_id)
 
 def CreateUser(email: str, username: str, hashed_password: str, verification_token: str | None = None) -> str:
     if verification_token and DoesPendingUserExist(email, username):
@@ -187,35 +232,21 @@ def GetUserHashedPasswordInDB(email: str) -> str:
     
     return user["password"]
 
-def StoreRefreshToken(user_id: str, token_hash: str, expires_at: datetime, email: str, username: str, device_fingerprint: Optional[str] = None, parent_token_id: Optional[str] = None) -> str:
-    """
-    StoreRefreshToken
-    
-    :param user_id: user id
-    :type user_id: str
-    :param token_hash: token hash
-    :type token_hash: str
-    :param expires_at: time token expires
-    :type expires_at: datetime
-    :param email: user email
-    :type email: str
-    :param username: username
-    :type username: str
-    :param device_fingerprint: fingerprint of device
-    :type device_fingerprint: Optional[str]
-    :param parent_token_id: parent token id
-    :type parent_token_id: Optional[str]
-    :return: inserted id is returned
-    :rtype: str
-    """
-    
+def StoreRefreshToken(
+    user_id: ObjectId,
+    token_hash: str,
+    expires_at: datetime,
+    email: str,
+    username: str,
+    device_fingerprint: Optional[str] = None,
+    parent_token_id: Optional[str] = None
+) -> str:
     refresh_tokens = GetDb()["refresh_tokens"]
 
-    # This is just to ensure that no user has multiple refresh tokens at a given time.
     RevokeAllUserRefreshTokens(user_id)
 
     result = refresh_tokens.insert_one({
-        "user_id": user_id,
+        "user_id": user_id, 
         "email": email,
         "username": username,
         "token_hash": token_hash,
@@ -263,10 +294,28 @@ def RevokeRefreshToken(token_hash: str) -> bool:
 
     return result.deleted_count > 0
 
-def RevokeAllUserRefreshTokens(user_id: str) -> int:
+def RevokeAllUserRefreshTokens(user_id: ObjectId) -> int:
     refresh_tokens = GetDb()["refresh_tokens"]
-    result = refresh_tokens.delete_many(
-        {"user_id": user_id},
+    result = refresh_tokens.delete_many({"user_id": user_id})
+    
+    return result.deleted_count
+
+def ConsumeRefreshToken(token_hash: str) -> Optional[Dict]:
+    refresh_tokens = GetDb()["refresh_tokens"]
+
+    token = refresh_tokens.find_one_and_delete(
+        {
+            "token_hash": token_hash,
+            "expires_at": {"$gt": datetime.now(timezone.utc)}
+        }
     )
 
-    return result.deleted_count
+    if not token:
+        return None
+
+    return {
+        "user_id": token["user_id"],
+        "email": token["email"],
+        "username": token["username"],
+        "device_fingerprint": token.get("device_fingerprint"),
+    }
