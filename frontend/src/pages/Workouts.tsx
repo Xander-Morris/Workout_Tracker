@@ -124,7 +124,9 @@ const Workouts: FC = () => {
     setFormData({
       name: workout.name,
       scheduled_date: DatesLibrary.getDateToLocaleDateTime(selectedDate),
-      exercises: workout.exercises || [],
+      exercises: workout.exercises
+      ? workout.exercises.map(e => ({ ...e }))
+      : [],
       comments: workout.comments || ''
     });
     setEditingId(workout.id);
@@ -139,12 +141,11 @@ const Workouts: FC = () => {
   };
 
   const updateExercise = (index: number, field: keyof Exercise, value: string | number) => {
-    const newExercises = [...formData.exercises];
-    if (field === 'name') {
-      newExercises[index][field] = value as string;
-    } else {
-      newExercises[index][field] = Number(value);
-    }
+    const newExercises = formData.exercises.map((exercise, i) =>
+      i === index
+        ? { ...exercise, [field]: field === "name" ? value : Number(value) }
+        : exercise
+    );
     setFormData({ ...formData, exercises: newExercises });
   };
 

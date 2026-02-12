@@ -16,7 +16,7 @@ router = APIRouter(tags=["workouts"], prefix="/workouts")
 @limiter.limit("10/minute")
 async def CreateWorkout(
     request: Request,
-    workout: models.WorkoutCreate,
+    workout: models.Workout,
     current_user = Depends(auth_helper.GetCurrentUser)
 ):
     workout_dict = workout.model_dump()
@@ -52,7 +52,7 @@ async def CreateWorkout(
 async def UpdateWorkout(
     request: Request,
     workout_id : str,
-    workout_update : models.WorkoutUpdate,
+    workout_update : models.Workout,
     current_user = Depends(auth_helper.GetCurrentUser)
 ):
     if not ObjectId.is_valid(workout_id):

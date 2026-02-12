@@ -1,5 +1,5 @@
 from pydantic import AwareDatetime, BaseModel, EmailStr, Field
-from datetime import date, datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 
 class UserCreate(BaseModel):
@@ -22,20 +22,30 @@ class BodyweightUpdate(BaseModel):
 class UserSettings(BaseModel):
     bodyweight: float = 0
 
-class ExerciseInWorkout(BaseModel):
+class Exercise(BaseModel):
     name: str
-    sets: int
-    reps: int
+    sets: int = 0
+    reps: int = 0
     weight: float = 0
-    notes: Optional[str] = Field(None, max_length=200)
 
-class WorkoutCreate(BaseModel):
-    name: str
-    scheduled_date: Optional[AwareDatetime] = None
+class NameRequired(BaseModel):
+    name: str = Field(..., min_length=1, pattern=r"\S")
+
+class ScheduledDateRequired(BaseModel):
+    scheduled_date: AwareDatetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )
+
+class ExercisesRequired(BaseModel):
+    exercises: List[Exercise] = Field(..., min_length=1)
+
+class Workout(NameRequired, ScheduledDateRequired, ExercisesRequired):
     comments: Optional[str] = None
-    exercises: List[ExerciseInWorkout] = Field(..., min_length=1)
 
-class WorkoutResponse(WorkoutCreate):
+class RoutineCreate(NameRequired, ExercisesRequired):
+    pass
+
+class WorkoutResponse(Workout):
     id: str
     user_id: str
     created_at: AwareDatetime 
@@ -46,39 +56,9 @@ class WorkoutResponse(WorkoutCreate):
         }
     }
 
-class WorkoutUpdate(BaseModel):
-    name: str
-    scheduled_date: Optional[AwareDatetime] = None
-    comments: Optional[str] = None
-    exercises: Optional[List[ExerciseInWorkout]] = None
-
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
-
-class ExerciseRequest(BaseModel):
-    exercise: str
-
-class VolumeOverPeriodRequest(BaseModel):
-    start_date: date
-    end_date: date
-    timezone: str
-    exercise: str | None = None
-
-class VolumeOverPeriodReport(BaseModel):
-    total_volume: float = 0 # It's a float since the weight can be a float.
-    per_day: Optional[dict[AwareDatetime, float]] = None
-    exercise: str # None gets converted to ""
-
-class OneRepMaxRequest(BaseModel):
-    start_date: date
-    end_date: date
-    timezone: str
-    exercise: str
-
-class OneRepMaxReport(BaseModel):
-    per_day: Optional[dict[AwareDatetime, float]] = None
-    exercise: str 
 
 class EmailVerificationModel(BaseModel):
     email: EmailStr 
