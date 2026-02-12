@@ -11,6 +11,7 @@ import { ListedWorkout } from '../components/listed_workout';
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useWorkouts } from '../contexts/workouts';
 import { useNavigate } from 'react-router';
+import { Card } from "../components/card.tsx";
 
 interface WorkoutFormData {
   name: string;
@@ -222,7 +223,7 @@ const Workouts: FC = () => {
                 onClick={() => {
                   navigate("/routines");
                 }}
-                className="flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto justify-center sm:justify-start"
+                className="flex items-center gap-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto justify-center sm:justify-start"
               >
                 Routines
               </button>
@@ -240,11 +241,11 @@ const Workouts: FC = () => {
             </div>
           </div>
 
-          <div className="bg-gray-400 rounded-lg shadow-md p-3 sm:p-4">
+          <div className="bg-[#2A2A3D] rounded-lg shadow-md p-3 sm:p-4">
             <div className="flex items-center justify-between gap-2 sm:gap-4">
               <button
                 onClick={goToPreviousDay}
-                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+                className="p-2 text-white hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
               >
                 <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
               </button>
@@ -254,7 +255,7 @@ const Workouts: FC = () => {
                   <p className="text-xl sm:text-2xl font-bold text-white-200">
                     {selectedDate.getDate()}
                   </p>
-                  <p className="text-xs sm:text-sm text-gray-900">
+                  <p className="text-xs sm:text-sm text-white-900">
                     {selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short' })}
                   </p>
                 </div>
@@ -270,7 +271,7 @@ const Workouts: FC = () => {
 
               <button
                 onClick={goToNextDay}
-                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+                className="p-2 text-white hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
               >
                 <ChevronRight size={20} className="sm:w-6 sm:h-6" />
               </button>
@@ -429,11 +430,11 @@ const Workouts: FC = () => {
           </h2>
           <div className="space-y-4">
             {getWorkoutsForDate(selectedDate).length === 0 ? (
-              <div className="bg-white rounded-lg shadow-md p-8 sm:p-12 text-center">
-                <Calendar size={40} className="sm:w-12 sm:h-12 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">No workouts today</h3>
-                <p className="text-sm sm:text-base text-gray-600 mb-4">Create a new workout or select a different date!</p>
-              </div>
+              <Card className="text-center">
+                <Calendar size={40} className="mt-4 sm:w-12 sm:h-12 mx-auto text-white mb-4" />
+                <h3 className="text-base sm:text-lg font-medium text-white mb-2">No workouts today</h3>
+                <p className="text-sm sm:text-base text-white mb-4">Create a new workout or select a different date!</p>
+              </Card>
             ) : (
               getWorkoutsForDate(selectedDate).map((workout: Workout) => (
                 <ListedWorkout

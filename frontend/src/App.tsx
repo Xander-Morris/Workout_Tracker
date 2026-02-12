@@ -10,6 +10,7 @@ import Home from './pages/Home';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
 import Workouts from './pages/Workouts';
+import Routines from "./pages/Routines";
 import Reports from './pages/Reports';
 import ErrorPage from './pages/ErrorPage';
 import Settings from './pages/Settings';
@@ -63,6 +64,14 @@ function App() {
         {
           path: "/login",
           element: <Login />,
+        },
+        {
+          path: "/routines",
+          element: (
+            <ProtectedRoute>
+              <Routines />
+            </ProtectedRoute>
+          ),
         },
         // Only workouts and reports need the WorkoutsProvider, so we wrap them individually in the router.
         // Otherwise, it would cause unnecessary rendering of the workouts context for pages that don't need it, like settings.

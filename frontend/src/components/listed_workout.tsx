@@ -1,6 +1,7 @@
 import type { FC } from "react";
 import { DatesLibrary } from '../lib/dates';
 import { Calendar, Edit2, Trash2, ChevronDown, ChevronUp, } from 'lucide-react';
+import { Card } from './card.tsx';
 
 interface ListedWorkoutProps {
     workout: Workout;
@@ -29,17 +30,17 @@ export const ListedWorkout: FC<ListedWorkoutProps> = ({
 
     return (
         <>
-            <div key={workout.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+            <Card key={workout.id}>
                 <div className="p-4">
                 <div className="flex items-start justify-between">
                     <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900">{workout.name}</h3>
-                    <div className="flex items-center gap-2 mt-1 text-sm text-gray-600">
+                    <h3 className="text-lg font-semibold text-white">{workout.name}</h3>
+                    <div className="flex items-center gap-2 mt-1 text-sm text-white">
                         <Calendar size={16} />
                         {DatesLibrary.formatDateToLocaleDateString(workout.scheduled_date)}
                     </div>
                     {workout.exercises && workout.exercises.length > 0 && (
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-sm text-white mt-1">
                         {workout.exercises.length} exercise{workout.exercises.length !== 1 ? 's' : ''}
                         </p>
                     )}
@@ -47,7 +48,7 @@ export const ListedWorkout: FC<ListedWorkoutProps> = ({
                     <div className="flex items-center gap-2">
                     <button
                         onClick={() => setExpandedId(expandedId === workout.id ? null : workout.id)}
-                        className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        className="p-2 text-white hover:bg-gray-100 rounded-lg transition-colors"
                     >
                         {expandedId === workout.id ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                     </button>
@@ -81,7 +82,7 @@ export const ListedWorkout: FC<ListedWorkoutProps> = ({
                     </div>
                     {workout.exercises && workout.exercises.length > 0 && (
                         <div className="mb-4">
-                        <h4 className="text-sm font-medium text-gray-700 mb-2">Exercises</h4>
+                        <h4 className="text-sm font-medium text-white mb-2">Exercises</h4>
                         <div className="space-y-2">
                             {workout.exercises.map((exercise, idx) => (
                             <div key={idx} className="bg-gray-50 rounded p-3 text-sm">
@@ -97,14 +98,14 @@ export const ListedWorkout: FC<ListedWorkoutProps> = ({
                     )}
                     {workout.comments && (
                         <div>
-                        <h4 className="text-sm font-medium text-gray-700 mb-2">Comments</h4>
+                        <h4 className="text-sm font-medium text-white mb-2">Comments</h4>
                         <p className="break-words whitespace-normal text-sm text-gray-600 bg-gray-50 rounded p-5">{workout.comments}</p>
                         </div>
                     )}
                     </div>
                 )}
                 </div>
-            </div>
+            </Card>
         </>
     );
 };
