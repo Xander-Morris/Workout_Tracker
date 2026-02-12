@@ -10,6 +10,7 @@ import { Notifications } from '../lib/notifications';
 import { ListedWorkout } from '../components/listed_workout';
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useWorkouts } from '../contexts/workouts';
+import { useNavigate } from 'react-router';
 
 interface WorkoutFormData {
   name: string;
@@ -26,6 +27,7 @@ const Workouts: FC = () => {
   const [showCalendarPicker, setShowCalendarPicker] = useState(false);
 
   const workouts = useWorkouts();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState<WorkoutFormData>({
     name: '',
@@ -215,20 +217,30 @@ const Workouts: FC = () => {
               <p className="text-sm sm:text-base text-gray-600 mt-1">Total workouts scheduled ever: {workouts.length}</p>
               <p className="text-sm sm:text-base text-gray-600 mt-1">Total workouts scheduled for this date: {getWorkoutsForDate(selectedDate).length}</p>
             </div>
-            <button
-              onClick={() => {
-                resetForm();
-                setIsCreating(true);
-                setEditingId(null);
-              }}
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto justify-center sm:justify-start"
-            >
-              <Plus size={20} />
-              New Workout
-            </button>
+            <div className="mt-16 flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
+              <button
+                onClick={() => {
+                  navigate("/routines");
+                }}
+                className="flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto justify-center sm:justify-start"
+              >
+                Routines
+              </button>
+              <button
+                onClick={() => {
+                  resetForm();
+                  setIsCreating(true);
+                  setEditingId(null);
+                }}
+                className="flex items-center gap-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto justify-center sm:justify-start"
+              >
+                <Plus size={20} />
+                New Workout
+              </button>
+            </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-3 sm:p-4">
+          <div className="bg-gray-400 rounded-lg shadow-md p-3 sm:p-4">
             <div className="flex items-center justify-between gap-2 sm:gap-4">
               <button
                 onClick={goToPreviousDay}
@@ -239,10 +251,10 @@ const Workouts: FC = () => {
 
               <div className="flex items-center gap-2 sm:gap-4 flex-1 sm:flex-none justify-center">
                 <div className="text-center">
-                  <p className="text-xl sm:text-2xl font-bold text-gray-900">
+                  <p className="text-xl sm:text-2xl font-bold text-white-200">
                     {selectedDate.getDate()}
                   </p>
-                  <p className="text-xs sm:text-sm text-gray-600">
+                  <p className="text-xs sm:text-sm text-gray-900">
                     {selectedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short' })}
                   </p>
                 </div>

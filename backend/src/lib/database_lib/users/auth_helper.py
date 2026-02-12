@@ -68,8 +68,11 @@ def CreateRefreshToken() -> str:
     return raw_token, token_hash
 
 def GenerateDeviceFingerprint(request: Request) -> str:
-    device_id = secrets.token_urlsafe(32)
+    device_id = request.cookies.get("device_id")
 
+    if not device_id:
+        device_id = secrets.token_urlsafe(32)
+        
     return hashlib.sha256(device_id.encode()).hexdigest()
     
 def CreateAccessToken(user_id: str, email: str, username: str) -> str:

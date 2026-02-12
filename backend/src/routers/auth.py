@@ -181,7 +181,12 @@ async def Refresh(request: Request, response: Response):
         raise APIError.unauthorized(ErrorMessage.REFRESH_TOKEN_MISSING)
     
     try:
-        device_fingerprint = auth_helper.GenerateDeviceFingerprint(request)
+        device_fingerprint = request.cookies.get("device_id")
+        
+        if not device_fingerprint:
+            ResponseDeleteCookieHelper(response)
+            raise APIError.unauthorized(ErrorMessage.REFRESH_TOKEN_MISSING)
+        
         access_token, new_refresh_token = auth_helper.RefreshAccessToken(refresh_token, device_fingerprint)
         
         ResponseSetCookieHelper(response, new_refresh_token, device_fingerprint)
