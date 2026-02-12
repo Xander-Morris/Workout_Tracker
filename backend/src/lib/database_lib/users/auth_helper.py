@@ -11,6 +11,7 @@ import secrets
 from lib.misc import emails
 from . import refresh_tokens
 from . import general_methods as general_user_methods
+from . import reset_password as reset_password_methods
 
 SECRET_KEY = config.SECRET_KEY
 ph = PasswordHasher()
@@ -23,7 +24,7 @@ def InitiateResetPassword(email: str) -> bool:
         return False
 
     user_id = user["_id"] 
-    raw_token = general_user_methods.StorePasswordResetToken(user_id)
+    raw_token = reset_password_methods.StorePasswordResetToken(user_id)
 
     return emails.SendResetPasswordEmail(raw_token, email)
 
