@@ -195,7 +195,7 @@ const Workouts: FC = () => {
         value={exercise[attribute as keyof Exercise] as string}
         onChange={(e) => updateExercise(index, attribute as keyof Exercise, e.target.value)}
         placeholder={attribute.charAt(0).toUpperCase() + attribute.slice(1)}
-        className="text-gray-700 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
+        className="text-white px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
       />
     );
   }
@@ -224,7 +224,7 @@ const Workouts: FC = () => {
                 onClick={() => {
                   navigate("/routines");
                 }}
-                className="flex items-center gap-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto justify-center sm:justify-start"
+                className="flex items-center gap-2 bg-[#2A2A3D] text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors w-full sm:w-auto justify-center sm:justify-start"
               >
                 Routines
               </button>
@@ -234,7 +234,7 @@ const Workouts: FC = () => {
                   setIsCreating(true);
                   setEditingId(null);
                 }}
-                className="flex items-center gap-2 bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto justify-center sm:justify-start"
+                className="flex items-center gap-2 bg-[#2A2A3D] text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors w-full sm:w-auto justify-center sm:justify-start"
               >
                 <Plus size={20} />
                 New Workout
@@ -290,9 +290,9 @@ const Workouts: FC = () => {
 
         {/* Create/Edit Form */}
         {(isCreating || editingId) && (
-          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6">
-            <div className="flex items-center justify-between mb-4 gap-2">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
+          <Card className="">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-lg sm:text-xl font-semibold text-white">
                 {editingId ? 'Edit Workout' : 'Create New Workout'}
               </h2>
               <button
@@ -301,7 +301,7 @@ const Workouts: FC = () => {
                   setEditingId(null);
                   resetForm();
                 }}
-                className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+                className="text-gray-400 hover:text-white flex-shrink-0"
               >
                 <X size={24} />
               </button>
@@ -309,36 +309,36 @@ const Workouts: FC = () => {
 
             <div className="space-y-3 sm:space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-white mb-1">
                   Workout Name
                 </label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="text-gray-700 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="text-white w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="e.g., Upper Body Strength"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-white mb-1">
                   Scheduled Date & Time
                 </label>
                 <input
                   type="datetime-local"
                   value={formData.scheduled_date}
                   onChange={(e) => setFormData({ ...formData, scheduled_date: e.target.value })}
-                  className="text-gray-700 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="text-white w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-3 sm:mb-4">
-                  <label className="text-sm font-medium text-gray-700">Exercises</label>
+                  <label className="text-sm font-medium text-white">Exercises</label>
                   <button
                     onClick={addExercise}
-                    className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                    className="text-xs sm:text-sm text-blue-200 hover:text-blue-700 flex items-center gap-1"
                   >
                     <Plus size={16} />
                     Add Exercise
@@ -348,16 +348,16 @@ const Workouts: FC = () => {
                 {formData.exercises.length > 0 && (
                   <div className="grid grid-cols-12 gap-2 sm:gap-3 mb-2">
                     <div className="col-span-4">
-                      <p className="text-xs sm:text-sm font-medium text-gray-700">Name</p>
+                      <p className="text-xs sm:text-sm font-medium text-white">Name</p>
                     </div>
                     <div className="col-span-2">
-                      <p className="text-xs sm:text-sm font-medium text-gray-700">Sets</p>
+                      <p className="text-xs sm:text-sm font-medium text-white">Sets</p>
                     </div>
                     <div className="col-span-2">
-                      <p className="text-xs sm:text-sm font-medium text-gray-700">Reps</p>
+                      <p className="text-xs sm:text-sm font-medium text-white">Reps</p>
                     </div>
                     <div className="col-span-2">
-                      <p className="text-xs sm:text-sm font-medium text-gray-700">Weight</p>
+                      <p className="text-xs sm:text-sm font-medium text-white">Weight</p>
                     </div>
                     <div className="col-span-1"></div>
                   </div>
@@ -389,7 +389,7 @@ const Workouts: FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-white mb-1">
                   Comments
                 </label>
                 <textarea
@@ -397,7 +397,7 @@ const Workouts: FC = () => {
                   value={formData.comments}
                   onChange={(e) => setFormData({ ...formData, comments: e.target.value })}
                   rows={3}
-                  className="text-gray-700 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="text-white w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Additional comments or instructions..."
                 />
               </div>
@@ -416,13 +416,13 @@ const Workouts: FC = () => {
                     setEditingId(null);
                     resetForm();
                   }}
-                  className="flex-1 sm:flex-none px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm sm:text-base"
+                  className="flex-1 sm:flex-none px-4 py-2 border border-gray-300 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm sm:text-base"
                 >
                   Cancel
                 </button>
               </div>
             </div>
-          </div>
+          </Card>
         )}
 
         <div className="mt-6 sm:mt-8">
