@@ -8,7 +8,6 @@ import { RoutineDropdown } from "../dropdowns/routine_dropdown.tsx";
 import Swal from "sweetalert2";
 import { useEffect, useState } from "react";
 import { useRoutines } from "../../contexts/routines";
-import { DatesLibrary } from "../../lib/dates.tsx";
 
 type ValidEditType = "workouts" | "routines";
 
@@ -23,6 +22,7 @@ interface CreateAndEditProps {
         React.SetStateAction<WorkoutFormData | RoutineFormData>
     >;
     defaultFormData: WorkoutFormData | RoutineFormData;
+    selectedDate?: string;
 }
 
 export function useDeleteItem(editType: ValidEditType) {
@@ -74,6 +74,7 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
     formData,
     setFormData,
     defaultFormData,
+    selectedDate,
 }) => {
     const endpoint = `/${editType}/`;
     const queryClient = useQueryClient();
@@ -101,7 +102,7 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
         if (prevValid && !currValid) {
             setFormData({
                 ...defaultFormData,
-                scheduled_date: DatesLibrary.getDateToLocaleDateTime(new Date()), 
+                scheduled_date: selectedDate, 
             });
         }
 
@@ -113,7 +114,7 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
                 name: selectedRoutine.name + " Copy",
                 exercises: selectedRoutine.exercises,
                 comments: selectedRoutine.comments,
-                scheduled_date: DatesLibrary.getDateToLocaleDateTime(new Date()), 
+                scheduled_date: selectedDate, 
             });
         }
 
