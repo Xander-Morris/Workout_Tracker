@@ -12,7 +12,6 @@ import {
     CreateAndEdit,
     useDeleteItem,
 } from "../components/workouts/create_and_edit.tsx";
-import { set } from "lodash";
 
 const Workouts: FC = () => {
     const [isCreating, setIsCreating] = useState(false);
