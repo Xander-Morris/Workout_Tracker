@@ -1,4 +1,5 @@
 from typing import Dict, List, Optional
+from lib.database_lib.database_config import GetDb
 from . import general_methods as general_methods 
 
 def UpdateRoutine(routine_id: str, user_id: str, update_data: Dict) -> bool:
@@ -15,3 +16,12 @@ def GetRoutineById(routine_id: str, user_id: str) -> Optional[Dict]:
 
 def GetRoutinesForUser(user_id: str, limit: int = 50, skip: int = 0) -> List[Dict]:
     return general_methods.GetCollectionEntriesForUser("routines", user_id, None, None, limit, skip)
+
+def IsThereARoutineWithName(user_id: str, name: str) -> bool:
+    routines = GetDb()["routines"]
+    existing_routine = routines.find_one({
+        "user_id": user_id,
+        "name": name
+    })
+
+    return existing_routine is not None

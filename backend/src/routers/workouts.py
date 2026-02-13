@@ -31,7 +31,7 @@ async def CreateWorkout(
         workout_dict["scheduled_date"] = workout_dict["scheduled_date"].replace(tzinfo=timezone.utc)
 
     if general_workout_methods.IsThereAWorkoutWithNameOnSameDate(current_user.user_id, workout_dict["name"], workout_dict["scheduled_date"]):
-        raise APIError.validation_error(ErrorMessage.ENTRY_WITH_NAME_ALREADY_EXISTS.format(name=workout_dict["name"]))
+        raise APIError.validation_error(ErrorMessage.WORKOUT_ENTRY_WITH_NAME_ALREADY_EXISTS.format(name=workout_dict["name"]))
 
     # I added this for some prevention of spamming workouts on a certain date.
     num_on_date = general_workout_methods.GetNumberOfWorkoutsForUserOnDate(current_user.user_id, workout_dict["scheduled_date"])

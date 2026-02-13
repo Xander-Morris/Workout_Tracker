@@ -73,7 +73,8 @@ class ErrorMessage:
     WORKOUT_NOT_FOUND = "Workout not found"
     SETTINGS_NOT_FOUND = "Settings not found"
     RESOURCE_NOT_OWNED = "Resource not found or not owned by user"
-    ENTRY_WITH_NAME_ALREADY_EXISTS = "An entry with the name '{name}' already exists on the same date"
+    WORKOUT_ENTRY_WITH_NAME_ALREADY_EXISTS = "An entry with the name '{name}' already exists on the same date"
+    ROUTINE_WITH_NAME_ALREADY_EXISTS = "A routine with the name '{name}' already exists"
     
     # Operation errors
     FAILED_TO_CREATE = "Failed to create resource"
