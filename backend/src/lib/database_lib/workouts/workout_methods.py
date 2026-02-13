@@ -45,10 +45,12 @@ def IsThereAWorkoutWithNameOnSameDate(user_id: str, name: str, date: datetime) -
 
     existing_workout = workouts.find_one({
         "user_id": user_id,
-        "name": { "$regex": f"^{name}$", "$options": "i" },
         "scheduled_date": {
             "$gte": start_of_day,
             "$lte": end_of_day
+        },
+        "$expr": {
+            "$eq": [{"$toLower": "$name"}, name.lower()]
         }
     })
 
