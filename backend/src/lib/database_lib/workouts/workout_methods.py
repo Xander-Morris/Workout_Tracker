@@ -36,3 +36,6 @@ def GetNumberOfWorkoutsForUserOnDate(user_id: str, date: datetime) -> int:
     })
     
     return count
+
+def IsThereAWorkoutWithName(user_id: str, name: str) -> bool:
+    return general_methods.IsThereAnEntryWithName("workouts", user_id, name)

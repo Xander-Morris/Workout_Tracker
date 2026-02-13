@@ -4,7 +4,10 @@ import { hasScheduledDate } from "./common_methods.tsx";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "../../lib/apiclient.tsx";
 import { Notifications } from "../../lib/notifications.tsx";
+import { RoutineDropdown } from "../dropdowns/routine_dropdown.tsx";
 import Swal from "sweetalert2";
+import { useEffect, useState } from "react";
+import { useRoutines } from "../../contexts/routines";
 
 type ValidEditType = "workouts" | "routines";
 
@@ -14,11 +17,11 @@ interface CreateAndEditProps {
     setIsCreating: (value: boolean) => void;
     editingId: string | null;
     setEditingId: (id: string | null) => void;
-    resetForm: () => void;
     formData: WorkoutFormData | RoutineFormData;
     setFormData: React.Dispatch<
         React.SetStateAction<WorkoutFormData | RoutineFormData>
     >;
+    defaultFormData: WorkoutFormData | RoutineFormData;
 }
 
 export function useDeleteItem(editType: ValidEditType) {
@@ -26,12 +29,15 @@ export function useDeleteItem(editType: ValidEditType) {
     const endpoint = `/${editType}/`;
 
     const deleteMutation = useMutation({
-        mutationFn: (id: string) => apiClient.delete(`${endpoint}${id}`).then(res => res.data),
+        mutationFn: (id: string) =>
+            apiClient.delete(`${endpoint}${id}`).then((res) => res.data),
         onSuccess: (_, id) => {
             queryClient.setQueryData<any[]>([editType], (oldList = []) =>
-                oldList.filter((item: any) => item.id !== id)
+                oldList.filter((item: any) => item.id !== id),
             );
-            Notifications.showSuccess(editType === "workouts" ? "Workout deleted" : "Routine deleted");
+            Notifications.showSuccess(
+                editType === "workouts" ? "Workout deleted" : "Routine deleted",
+            );
         },
         onError: (err: any) => Notifications.showError(err),
     });
@@ -64,9 +70,9 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
     setIsCreating,
     editingId,
     setEditingId,
-    resetForm,
     formData,
     setFormData,
+    defaultFormData,
 }) => {
     const endpoint = `/${editType}/`;
     const queryClient = useQueryClient();
@@ -74,7 +80,31 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
         workouts: Workout[];
         routines: Routine[];
     };
-    
+    const [dropdownVisible, setDropdownVisible] = useState(false);
+    const [selectedRoutineName, setSelectedRoutineName] = useState("");
+
+    const routines = useRoutines();
+
+    useEffect(() => {
+        if (editType != "workouts" || !selectedRoutineName) return;
+
+        const selectedRoutine = routines.find(
+            (routine) => routine.name === selectedRoutineName,
+        );
+
+        if (!selectedRoutine) {
+            setFormData(defaultFormData);
+            return;
+        }
+
+        setFormData({
+            name: selectedRoutine.name + " Copy",
+            exercises: selectedRoutine.exercises,
+            comments: selectedRoutine.comments,
+            scheduled_date: formData.scheduled_date,
+        });
+    }), [selectedRoutineName];
+
     const createWorkoutOrRoutine = useMutation({
         mutationFn: (data: WorkoutFormData | RoutineFormData) =>
             apiClient
@@ -90,9 +120,14 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
                 [editType],
                 (oldList = []) => [...oldList, newList],
             );
-            resetForm();
+            setSelectedRoutineName("");
+            setFormData(defaultFormData);
             setIsCreating(false);
-            Notifications.showSuccess(editType === "workouts" ? "Workout created!" : "Routine created!");
+            Notifications.showSuccess(
+                editType === "workouts"
+                    ? "Workout created!"
+                    : "Routine created!",
+            );
         },
         onError: (err: any) => Notifications.showError(err),
     });
@@ -126,9 +161,13 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
                 },
             );
 
-            resetForm();
+            setFormData(defaultFormData);
             setEditingId(null);
-            Notifications.showSuccess(editType === "workouts" ? "Workout updated!" : "Routine updated!");
+            Notifications.showSuccess(
+                editType === "workouts"
+                    ? "Workout updated!"
+                    : "Routine updated!",
+            );
         },
         onError: (err: any) => Notifications.showError(err),
     });
@@ -197,13 +236,21 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
                 <Card className="*:p-2">
                     <div className="flex items-center justify-between gap-2">
                         <h2 className="text-lg sm:text-xl font-semibold text-white">
-                            {editingId ? "Edit " + (editType == "workouts" ? "Workout" : "Routine") : "Create New " + (editType == "workouts" ? "Workout" : "Routine")}
+                            {editingId
+                                ? "Edit " +
+                                  (editType == "workouts"
+                                      ? "Workout"
+                                      : "Routine")
+                                : "Create New " +
+                                  (editType == "workouts"
+                                      ? "Workout"
+                                      : "Routine")}
                         </h2>
                         <button
                             onClick={() => {
                                 setIsCreating(false);
                                 setEditingId(null);
-                                resetForm();
+                                setFormData(defaultFormData);
                             }}
                             className="text-gray-400 hover:text-white flex-shrink-0"
                         >
@@ -213,9 +260,25 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
 
                     <div className="space-y-3 sm:space-y-4">
                         {editingId ? <></> : <></>}
+                        {editType == "workouts" && isCreating && (
+                            <div>
+                                <label className="block text-sm font-medium text-white mb-2">
+                                    Select a routine template to copy (optional)
+                                </label>
+                                <RoutineDropdown
+                                    setIsVisible={setDropdownVisible}
+                                    setSelectedName={setSelectedRoutineName}
+                                    isVisible={dropdownVisible}
+                                    selectedName={selectedRoutineName}
+                                    selections={routines.map((routine: Routine) => routine.name)}
+                                />
+                            </div>
+                        )}
                         <div>
                             <label className="block text-sm font-medium text-white mb-1">
-                                {editType == "workouts" ? "Workout Name" : "Routine Name"}
+                                {editType == "workouts"
+                                    ? "Workout Name"
+                                    : "Routine Name"}
                             </label>
                             <input
                                 type="text"
@@ -231,24 +294,25 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
                             />
                         </div>
 
-                        {editType == "workouts" && hasScheduledDate(formData) && (
-                            <div>
-                                <label className="block text-sm font-medium text-white mb-1">
-                                    Scheduled Date & Time
-                                </label>
-                                <input
-                                    type="datetime-local"
-                                    value={formData.scheduled_date}
-                                    onChange={(e) =>
-                                        setFormData({
-                                            ...formData,
-                                            scheduled_date: e.target.value,
-                                        })
-                                    }
-                                    className="text-white w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                            </div>
-                        )}
+                        {editType == "workouts" &&
+                            hasScheduledDate(formData) && (
+                                <div>
+                                    <label className="block text-sm font-medium text-white mb-1">
+                                        Scheduled Date & Time
+                                    </label>
+                                    <input
+                                        type="datetime-local"
+                                        value={formData.scheduled_date}
+                                        onChange={(e) =>
+                                            setFormData({
+                                                ...formData,
+                                                scheduled_date: e.target.value,
+                                            })
+                                        }
+                                        className="text-white w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                </div>
+                            )}
 
                         <div>
                             <div className="flex items-center justify-between mb-3 sm:mb-4">
@@ -368,20 +432,20 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
                                               id: editingId,
                                               data: formData,
                                           })
-                                        : createWorkoutOrRoutine.mutate(formData)
+                                        : createWorkoutOrRoutine.mutate(
+                                              formData,
+                                          )
                                 }
                                 className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
                             >
                                 <Check size={20} />
-                                {editingId
-                                    ? "Update"
-                                    : "Create"}
+                                {editingId ? "Update" : "Create"}
                             </button>
                             <button
                                 onClick={() => {
                                     setIsCreating(false);
                                     setEditingId(null);
-                                    resetForm();
+                                    setFormData(defaultFormData);
                                 }}
                                 className="flex-1 sm:flex-none px-4 py-2 border border-gray-300 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm sm:text-base"
                             >

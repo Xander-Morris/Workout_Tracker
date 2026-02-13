@@ -1,22 +1,32 @@
 import type { FC } from "react";
 
 interface DropdownProps {
-    toggleDropdown: () => void;
     isVisible: boolean;
     selectedName: string | null;
     selections: string[];
-    handleToggle: (selection: string) => void;
     defaultText: string | null;
+    setIsVisible: (isVisible: boolean) => void;
+    setSelectedName: (name: string) => void;
 }
 
 export const Dropdown: FC<DropdownProps> = ({
-    toggleDropdown,
+    setIsVisible,
     isVisible,
     selectedName,
+    setSelectedName,
     selections,
-    handleToggle,
     defaultText,
 }) => {
+    const handleToggle = (new_selection: string) => {
+        const isDeselecting = selectedName === new_selection;
+        setSelectedName(isDeselecting ? "" : new_selection);
+        setIsVisible(false);
+    };
+
+    const toggleDropdown = () => {
+        setIsVisible(!isVisible);
+    };
+
     const addSelection = (selection: string) => (
         <li key={selection}>
             <button

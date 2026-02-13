@@ -68,16 +68,6 @@ const Reports: FC = () => {
         setStatus("success");
     };
 
-    const handleToggle = (exercise: string) => {
-        const isDeselecting = selectedExerciseName === exercise;
-        setSelectedExerciseName(isDeselecting ? "" : exercise);
-        setDropdownVisible(false);
-    };
-
-    const toggleDropdown = () => {
-        setDropdownVisible(!dropdownVisible);
-    };
-
     useEffect(() => {
         fetchAllExercises();
     }, [workouts]);
@@ -306,11 +296,11 @@ const Reports: FC = () => {
     const createExerciseDropdown = () => {
         return (
             <ExerciseDropdown
-                toggleDropdown={toggleDropdown}
+                setIsVisible={setDropdownVisible}
+                setSelectedName={setSelectedExerciseName}
                 isVisible={dropdownVisible}
                 selectedName={selectedExerciseName}
                 selections={exercises}
-                handleToggle={handleToggle}
             />
         );
     };

@@ -1,11 +1,6 @@
 import type { FC } from "react";
 import { useState } from "react";
-import {
-    Calendar,
-    Plus,
-    ChevronLeft,
-    ChevronRight,
-} from "lucide-react";
+import { Calendar, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { Navbar } from "../components/navbar.tsx";
 import { CalendarPicker } from "../components/dates/calendar_picker.tsx";
 import { DatesLibrary } from "../lib/dates";
@@ -13,7 +8,11 @@ import { ListedWorkout } from "../components/workouts/listed_workout.tsx";
 import { useWorkouts } from "../contexts/workouts";
 import { useNavigate } from "react-router";
 import { Card } from "../components/card.tsx";
-import { CreateAndEdit, useDeleteItem } from "../components/workouts/create_and_edit.tsx";
+import {
+    CreateAndEdit,
+    useDeleteItem,
+} from "../components/workouts/create_and_edit.tsx";
+import { set } from "lodash";
 
 const Workouts: FC = () => {
     const [isCreating, setIsCreating] = useState(false);
@@ -26,23 +25,14 @@ const Workouts: FC = () => {
     const navigate = useNavigate();
     const deleteWorkoutOrRoutine = useDeleteItem("workouts");
 
-    const [formData, setFormData] = useState<WorkoutFormData | RoutineFormData>(
-        {
-            name: "",
-            scheduled_date: new Date().toISOString().slice(0, 16),
-            exercises: [],
-            comments: "",
-        },
-    );
-
-    const resetForm = () => {
-        setFormData({
-            name: "",
-            scheduled_date: DatesLibrary.getDateToLocaleDateTime(selectedDate),
-            exercises: [],
-            comments: "",
-        });
+    const defaultFormData = {
+        name: "",
+        scheduled_date: new Date().toISOString().slice(0, 16),
+        exercises: [],
+        comments: "",
     };
+
+    const [formData, setFormData] = useState<WorkoutFormData | RoutineFormData>(defaultFormData);
 
     const startEdit = (workout: Workout | Routine) => {
         setFormData({
@@ -126,7 +116,7 @@ const Workouts: FC = () => {
                             </button>
                             <button
                                 onClick={() => {
-                                    resetForm();
+                                    setFormData(defaultFormData);
                                     setIsCreating(true);
                                     setEditingId(null);
                                 }}
@@ -208,10 +198,10 @@ const Workouts: FC = () => {
                 {/* Create/Edit Form */}
                 <CreateAndEdit
                     editType={"workouts"}
+                    defaultFormData={defaultFormData}
                     isCreating={isCreating}
                     setIsCreating={setIsCreating}
                     setEditingId={setEditingId}
-                    resetForm={resetForm}
                     editingId={editingId}
                     formData={formData}
                     setFormData={setFormData}

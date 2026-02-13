@@ -12,22 +12,13 @@ const Routines: FC = () => {
     const [expandedId, setExpandedId] = useState<string | null>(null);
 
     const routines = useRoutines();
-
-    const [formData, setFormData] = useState<WorkoutFormData | RoutineFormData>(
-        {
-            name: "",
-            exercises: [],
-            comments: "",
-        },
-    );
-
-    const resetForm = () => {
-        setFormData({
-            name: "",
-            exercises: [],
-            comments: "",
-        });
+    const defaultFormData = {
+        name: "",
+        exercises: [],
+        comments: "",
     };
+
+    const [formData, setFormData] = useState<WorkoutFormData | RoutineFormData>(defaultFormData);
 
     return (
         <>
@@ -46,7 +37,7 @@ const Routines: FC = () => {
                                 <BackButton className="flex items-center gap-2 bg-[#2A2A3D] text-white px-3 py-3 rounded-lg hover:bg-gray-600 transition-colors justify-center sm:justify-start" />
                                 <button
                                     onClick={() => {
-                                        resetForm();
+                                        setFormData(defaultFormData);
                                         setIsCreating(true);
                                         setEditingId(null);
                                     }}
@@ -65,10 +56,10 @@ const Routines: FC = () => {
                         isCreating={isCreating}
                         setIsCreating={setIsCreating}
                         setEditingId={setEditingId}
-                        resetForm={resetForm}
                         editingId={editingId}
                         formData={formData}
                         setFormData={setFormData}
+                        defaultFormData={defaultFormData}
                     />
 
                     <div className="mt-6 sm:mt-8">
