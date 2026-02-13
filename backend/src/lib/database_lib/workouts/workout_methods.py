@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+import re
 from typing import Dict, List, Optional
 from ..database_config import GetDb
 from . import general_methods as general_methods
@@ -39,22 +40,17 @@ def GetNumberOfWorkoutsForUserOnDate(user_id: str, date: datetime) -> int:
 
 def IsThereAWorkoutWithNameOnSameDate(user_id: str, name: str, date: datetime) -> bool:
     workouts = GetDb()["workouts"]
-
     start_of_day = datetime(date.year, date.month, date.day, tzinfo=timezone.utc)
     end_of_day = datetime(date.year, date.month, date.day, 23, 59, 59, 999999, tzinfo=timezone.utc)
-
+    escaped_name = re.escape(name.strip())
+    pattern = rf"^\s*{escaped_name}\s*$"
     existing_workout = workouts.find_one({
         "user_id": user_id,
         "scheduled_date": {
             "$gte": start_of_day,
             "$lte": end_of_day
         },
-        "$expr": {
-            "$eq": [
-                {"$toLower": {"$trim": {"input": "$name"}}}, 
-                name.strip().lower()                       
-            ]
-        }
+        "name": {"$regex": pattern, "$options": "i"}
     })
 
     return existing_workout is not None
