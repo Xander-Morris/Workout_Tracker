@@ -21,7 +21,7 @@ def IsThereARoutineWithName(user_id: str, name: str) -> bool:
     routines = GetDb()["routines"]
     existing_routine = routines.find_one({
         "user_id": user_id,
-        "name": name
+        "name": { "$regex": f"^{name}$", "$options": "i" }
     })
 
     return existing_routine is not None
