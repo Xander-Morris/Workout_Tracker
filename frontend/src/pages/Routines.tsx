@@ -5,7 +5,6 @@ import ListedRoutine from "../components/workouts/listed_routine";
 import { Plus } from "lucide-react";
 import { BackButton } from "../components/basic_buttons/back_button";
 import { CreateAndEdit } from "../components/workouts/create_and_edit.tsx";
-import { useMutation } from "@tanstack/react-query";
 
 const Routines: FC = () => {
     const [isCreating, setIsCreating] = useState(false);
