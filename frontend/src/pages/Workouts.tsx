@@ -26,7 +26,7 @@ const Workouts: FC = () => {
 
     const defaultFormData = {
         name: "",
-        scheduled_date: DatesLibrary.getDateToLocaleDateTime(new Date()),
+        scheduled_date: DatesLibrary.getDateToLocaleDateTime(selectedDate),
         exercises: [],
         comments: "",
     };
