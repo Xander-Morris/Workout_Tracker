@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import List
 from bson import ObjectId
 from fastapi import Query, Request, status, APIRouter, Depends
@@ -19,6 +20,8 @@ async def CreateRoutine(
 ):
     routine_dict = routine.model_dump()
     routine_dict["user_id"] = current_user.user_id
+    now = datetime.now(datetime.timezone.utc)
+    routine_dict["created_at"] = now
     routine_id = routine_methods.CreateRoutine(routine_dict)
     created_routine = routine_methods.GetRoutineById(routine_id, current_user.user_id)
     

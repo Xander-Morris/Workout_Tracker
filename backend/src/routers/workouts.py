@@ -63,7 +63,6 @@ async def UpdateWorkout(
     if not updated_data:
         raise APIError.validation_error(ErrorMessage.NO_DATA_PROVIDED)
 
-    updated_data["updated_at"] = datetime.now(timezone.utc)
     success = general_workout_methods.UpdateWorkout(workout_id, current_user.user_id, updated_data)
     
     if not success:

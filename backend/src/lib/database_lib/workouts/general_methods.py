@@ -6,6 +6,7 @@ from ..database_config import GetDb, MakeDatetimeAware
 
 def UpdateCollectionEntry(collection_name: str, entry_id: str, user_id: str, update_data: Dict) -> bool:
     collection = GetDb()[collection_name]
+    update_data["updated_at"] = datetime.now(timezone.utc)
 
     try:
         collection.update_one(
@@ -50,7 +51,7 @@ def GetCollectionEntriesForUser(collection_name: str, user_id: str,
     cursor = None
 
     if collection_name == "workouts":
-        cursor = collection.find(filter_query).sort("scheduled_date", -1  ).skip(skip).limit(limit)
+        cursor = collection.find(filter_query).sort("scheduled_date", -1).skip(skip).limit(limit)
     else:
         cursor = collection.find(filter_query).skip(skip).limit(limit)
     

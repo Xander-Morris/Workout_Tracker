@@ -39,10 +39,13 @@ class ScheduledDateRequired(BaseModel):
 class ExercisesRequired(BaseModel):
     exercises: List[Exercise] = Field(..., min_length=1)
 
-class Workout(NameRequired, ScheduledDateRequired, ExercisesRequired):
-    comments: Optional[str] = None
+class OptionalComments(BaseModel):
+    comments: Optional[str] = Field(..., min_length=0, max_length=250)
 
-class Routine(NameRequired, ExercisesRequired):
+class Workout(NameRequired, ScheduledDateRequired, ExercisesRequired, OptionalComments):
+    pass
+
+class Routine(NameRequired, ExercisesRequired, OptionalComments):
     pass
 
 class UserCreation(BaseModel):

@@ -7,7 +7,7 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 export const Card: FC<CardProps> = ({ children, ...props }) => {
     return (
         <div {...props}>
-            <div className="*:p-4 bg-[#2A2A3D] rounded-lg shadow-md overflow-hidden">
+            <div className="*:p-1 bg-[#2A2A3D] rounded-lg shadow-md overflow-hidden">
                 {children}
             </div>
         </div>

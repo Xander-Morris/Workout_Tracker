@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { isEqual } from "lodash";
 import { Navbar } from "../components/navbar";
 import { ExerciseDropdown } from "../components/dropdowns/exercise_dropdown";
-import { ListedWorkout } from "../components/listed_workout";
+import { ListedWorkout } from "../components/workouts/listed_workout";
 import { CalendarPicker } from "../components/dates/calendar_picker";
 import { DatesLibrary } from "../lib/dates";
 import { Notifications } from "../lib/notifications";

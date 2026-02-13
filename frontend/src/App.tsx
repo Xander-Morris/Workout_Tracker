@@ -16,6 +16,7 @@ import CheckInboxPage from "./pages/CheckInboxPage";
 import ProtectedRoute from "./lib/protected_route";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { RoutinesProvider } from "./contexts/routines";
 
 function Layout() {
     return (
@@ -67,18 +68,20 @@ function App() {
                     path: "/routines",
                     element: (
                         <ProtectedRoute>
-                            <Routines />
+                            <RoutinesProvider>
+                                <Routines />
+                            </RoutinesProvider>
                         </ProtectedRoute>
                     ),
                 },
-                // Only workouts and reports need the WorkoutsProvider, so we wrap them individually in the router.
-                // Otherwise, it would cause unnecessary rendering of the workouts context for pages that don't need it, like settings.
                 {
                     path: "/workouts",
                     element: (
                         <ProtectedRoute>
                             <WorkoutsProvider>
-                                <Workouts />
+                                <RoutinesProvider>
+                                    <Workouts />
+                                </RoutinesProvider>
                             </WorkoutsProvider>
                         </ProtectedRoute>
                     ),

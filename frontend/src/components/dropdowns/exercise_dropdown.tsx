@@ -7,12 +7,7 @@ type ExerciseDropdownProps = Omit<
 >;
 
 export const ExerciseDropdown: FC<ExerciseDropdownProps> = (props) => {
-    return (
-        <Dropdown
-            {...props}
-            defaultText="Select an exercise"
-        />
-    );
+    return <Dropdown {...props} defaultText="Select an exercise" />;
 };
 
 export default ExerciseDropdown;

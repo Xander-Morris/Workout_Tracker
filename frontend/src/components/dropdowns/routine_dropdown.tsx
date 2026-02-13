@@ -7,12 +7,7 @@ type RoutineDropdownProps = Omit<
 >;
 
 export const RoutineDropdown: FC<RoutineDropdownProps> = (props) => {
-    return (
-        <Dropdown
-            {...props}
-            defaultText="Select a routine"
-        />
-    );
+    return <Dropdown {...props} defaultText="Select a routine" />;
 };
 
 export default RoutineDropdown;

@@ -14,18 +14,13 @@ import { Navbar } from "../components/navbar.tsx";
 import { CalendarPicker } from "../components/dates/calendar_picker.tsx";
 import { DatesLibrary } from "../lib/dates";
 import { Notifications } from "../lib/notifications";
-import { ListedWorkout } from "../components/listed_workout";
+import { ListedWorkout } from "../components/workouts/listed_workout.tsx";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useWorkouts } from "../contexts/workouts";
 import { useNavigate } from "react-router";
 import { Card } from "../components/card.tsx";
-
-interface WorkoutFormData {
-    name: string;
-    scheduled_date: string;
-    exercises: Exercise[];
-    comments: string;
-}
+import { CreateAndEdit } from "../components/workouts/create_and_edit.tsx";
+import { hasScheduledDate } from "../components/workouts/common_methods.tsx";
 
 const Workouts: FC = () => {
     const [isCreating, setIsCreating] = useState(false);
@@ -37,21 +32,25 @@ const Workouts: FC = () => {
     const workouts = useWorkouts();
     const navigate = useNavigate();
 
-    const [formData, setFormData] = useState<WorkoutFormData>({
-        name: "",
-        scheduled_date: new Date().toISOString().slice(0, 16),
-        exercises: [],
-        comments: "",
-    });
+    const [formData, setFormData] = useState<WorkoutFormData | RoutineFormData>(
+        {
+            name: "",
+            scheduled_date: new Date().toISOString().slice(0, 16),
+            exercises: [],
+            comments: "",
+        },
+    );
 
     const queryClient = useQueryClient();
 
     const createWorkout = useMutation({
-        mutationFn: (data: WorkoutFormData) =>
+        mutationFn: (data: WorkoutFormData | RoutineFormData) =>
             apiClient
                 .post("/workouts/", {
                     ...data,
-                    scheduled_date: new Date(data.scheduled_date).toISOString(),
+                    scheduled_date: hasScheduledDate(data)
+                        ? new Date(data.scheduled_date).toISOString()
+                        : undefined,
                 })
                 .then((res) => res.data),
         onSuccess: (newWorkout) => {
@@ -72,12 +71,14 @@ const Workouts: FC = () => {
             data,
         }: {
             workoutId: string;
-            data: WorkoutFormData;
+            data: WorkoutFormData | RoutineFormData;
         }) =>
             apiClient
                 .put(`/workouts/${workoutId}`, {
                     ...data,
-                    scheduled_date: new Date(data.scheduled_date).toISOString(),
+                    scheduled_date: hasScheduledDate(data)
+                        ? new Date(data.scheduled_date).toISOString()
+                        : undefined,
                 })
                 .then((res) => res.data),
         onSuccess: (updatedWorkout) => {
@@ -124,8 +125,8 @@ const Workouts: FC = () => {
             showCancelButton: true,
             confirmButtonText: "Yes",
             cancelButtonText: "No",
-            confirmButtonColor: "rgb(0, 235, 47)",
-            cancelButtonColor: "rgb(239, 11, 15)",
+            confirmButtonColor: "rgb(19, 119, 39)",
+            cancelButtonColor: "rgb(150, 12, 14)",
             background: "rgb(15, 15, 15)",
             color: "#f8fafc",
         });
@@ -146,7 +147,7 @@ const Workouts: FC = () => {
         });
     };
 
-    const startEdit = (workout: Workout) => {
+    const startEdit = (workout: Workout | Routine) => {
         setFormData({
             name: workout.name,
             scheduled_date: DatesLibrary.getDateToLocaleDateTime(selectedDate),
@@ -157,39 +158,6 @@ const Workouts: FC = () => {
         });
         setEditingId(workout.id);
         setIsCreating(false);
-    };
-
-    const addExercise = () => {
-        setFormData({
-            ...formData,
-            exercises: [
-                ...formData.exercises,
-                { name: "", sets: 0, reps: 0, weight: 0 },
-            ],
-        });
-    };
-
-    const updateExercise = (
-        index: number,
-        field: keyof Exercise,
-        value: string | number,
-    ) => {
-        const newExercises = formData.exercises.map((exercise, i) =>
-            i === index
-                ? {
-                      ...exercise,
-                      [field]: field === "name" ? value : Number(value),
-                  }
-                : exercise,
-        );
-        setFormData({ ...formData, exercises: newExercises });
-    };
-
-    const removeExercise = (index: number) => {
-        setFormData({
-            ...formData,
-            exercises: formData.exercises.filter((_, i) => i !== index),
-        });
     };
 
     const getWorkoutsForDate = (date: Date) => {
@@ -224,31 +192,6 @@ const Workouts: FC = () => {
         changeDayOrMonth(true, 1);
     };
 
-    const createUpdateExerciseField = (
-        exercise: Exercise,
-        index: number,
-        attribute: string,
-        input_type: string,
-    ) => {
-        return (
-            <input
-                type={input_type}
-                value={exercise[attribute as keyof Exercise] as string}
-                onChange={(e) =>
-                    updateExercise(
-                        index,
-                        attribute as keyof Exercise,
-                        e.target.value,
-                    )
-                }
-                placeholder={
-                    attribute.charAt(0).toUpperCase() + attribute.slice(1)
-                }
-                className="text-white px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
-            />
-        );
-    };
-
     if (!workouts) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -259,7 +202,7 @@ const Workouts: FC = () => {
 
     return (
         <div className="background-primary">
-            <Navbar></Navbar>
+            <Navbar />
             <div className="w-full px-4 sm:px-6 lg:px-8 mx-auto pt-6 max-w-7xl">
                 <div className="mb-8">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
@@ -366,206 +309,21 @@ const Workouts: FC = () => {
                 </div>
 
                 {/* Create/Edit Form */}
-                {(isCreating || editingId) && (
-                    <Card className="">
-                        <div className="flex items-center justify-between gap-2">
-                            <h2 className="text-lg sm:text-xl font-semibold text-white">
-                                {editingId
-                                    ? "Edit Workout"
-                                    : "Create New Workout"}
-                            </h2>
-                            <button
-                                onClick={() => {
-                                    setIsCreating(false);
-                                    setEditingId(null);
-                                    resetForm();
-                                }}
-                                className="text-gray-400 hover:text-white flex-shrink-0"
-                            >
-                                <X size={24} />
-                            </button>
-                        </div>
-
-                        <div className="space-y-3 sm:space-y-4">
-                            {editingId ? <>
-                              
-                            </> : <></>}
-                            <div>
-                                <label className="block text-sm font-medium text-white mb-1">
-                                    Workout Name
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.name}
-                                    onChange={(e) =>
-                                        setFormData({
-                                            ...formData,
-                                            name: e.target.value,
-                                        })
-                                    }
-                                    className="text-white w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="e.g., Upper Body Strength"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-white mb-1">
-                                    Scheduled Date & Time
-                                </label>
-                                <input
-                                    type="datetime-local"
-                                    value={formData.scheduled_date}
-                                    onChange={(e) =>
-                                        setFormData({
-                                            ...formData,
-                                            scheduled_date: e.target.value,
-                                        })
-                                    }
-                                    className="text-white w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                            </div>
-
-                            <div>
-                                <div className="flex items-center justify-between mb-3 sm:mb-4">
-                                    <label className="text-sm font-medium text-white">
-                                        Exercises
-                                    </label>
-                                    <button
-                                        onClick={addExercise}
-                                        className="text-xs sm:text-sm text-blue-200 hover:text-blue-700 flex items-center gap-1"
-                                    >
-                                        <Plus size={16} />
-                                        Add Exercise
-                                    </button>
-                                </div>
-
-                                {formData.exercises.length > 0 && (
-                                    <div className="grid grid-cols-12 gap-2 sm:gap-3 mb-2">
-                                        <div className="col-span-4">
-                                            <p className="text-xs sm:text-sm font-medium text-white">
-                                                Name
-                                            </p>
-                                        </div>
-                                        <div className="col-span-2">
-                                            <p className="text-xs sm:text-sm font-medium text-white">
-                                                Sets
-                                            </p>
-                                        </div>
-                                        <div className="col-span-2">
-                                            <p className="text-xs sm:text-sm font-medium text-white">
-                                                Reps
-                                            </p>
-                                        </div>
-                                        <div className="col-span-2">
-                                            <p className="text-xs sm:text-sm font-medium text-white">
-                                                Weight
-                                            </p>
-                                        </div>
-                                        <div className="col-span-1"></div>
-                                    </div>
-                                )}
-
-                                {formData.exercises.map((exercise, index) => (
-                                    <div
-                                        key={index}
-                                        className="grid grid-cols-12 gap-2 sm:gap-3 mb-2 items-end"
-                                    >
-                                        <div className="col-span-4">
-                                            {createUpdateExerciseField(
-                                                exercise,
-                                                index,
-                                                "name",
-                                                "text",
-                                            )}
-                                        </div>
-                                        <div className="col-span-2">
-                                            {createUpdateExerciseField(
-                                                exercise,
-                                                index,
-                                                "sets",
-                                                "number",
-                                            )}
-                                        </div>
-                                        <div className="col-span-2">
-                                            {createUpdateExerciseField(
-                                                exercise,
-                                                index,
-                                                "reps",
-                                                "number",
-                                            )}
-                                        </div>
-                                        <div className="col-span-2">
-                                            {createUpdateExerciseField(
-                                                exercise,
-                                                index,
-                                                "weight",
-                                                "number",
-                                            )}
-                                        </div>
-                                        <div className="col-span-2 flex items-center justify-center h-full">
-                                            <button
-                                                onClick={() =>
-                                                    removeExercise(index)
-                                                }
-                                                className="text-red-600 hover:text-red-700 hover:bg-red-100 bg-red-50 p-2 rounded-lg transition-colors flex items-center justify-center w-full h-full"
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-white mb-1">
-                                    Comments
-                                </label>
-                                <textarea
-                                    maxLength={150}
-                                    value={formData.comments}
-                                    onChange={(e) =>
-                                        setFormData({
-                                            ...formData,
-                                            comments: e.target.value,
-                                        })
-                                    }
-                                    rows={3}
-                                    className="text-white w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="Additional comments or instructions..."
-                                />
-                            </div>
-
-                            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
-                                <button
-                                    onClick={() =>
-                                        editingId
-                                            ? updateWorkout.mutate({
-                                                  workoutId: editingId,
-                                                  data: formData,
-                                              })
-                                            : createWorkout.mutate(formData)
-                                    }
-                                    className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
-                                >
-                                    <Check size={20} />
-                                    {editingId
-                                        ? "Update Workout"
-                                        : "Create Workout"}
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setIsCreating(false);
-                                        setEditingId(null);
-                                        resetForm();
-                                    }}
-                                    className="flex-1 sm:flex-none px-4 py-2 border border-gray-300 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm sm:text-base"
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-                        </div>
-                    </Card>
-                )}
+                <CreateAndEdit
+                    isCreating={isCreating}
+                    setIsCreating={setIsCreating}
+                    setEditingId={setEditingId}
+                    resetForm={resetForm}
+                    editingId={editingId}
+                    formData={formData}
+                    setFormData={setFormData}
+                    createWorkoutOrRoutine={(data) =>
+                        createWorkout.mutate(data)
+                    }
+                    updateWorkoutOrRoutine={({ id, data }) =>
+                        updateWorkout.mutate({ workoutId: id, data })
+                    }
+                />
 
                 <div className="mt-6 sm:mt-8">
                     <h2 className="text-lg sm:text-xl font-semibold text-white-600 mb-4">
