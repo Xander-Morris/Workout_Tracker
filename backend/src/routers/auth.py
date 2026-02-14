@@ -173,7 +173,7 @@ async def Login(request: Request, user: models.UserLogin, response: Response):
     )
 
 @router.post("/refresh", response_model=models.TokenResponse, status_code=status.HTTP_200_OK)
-@limiter.limit("2/minute")
+@limiter.limit("4/minute")
 async def Refresh(request: Request, response: Response):
     refresh_token = request.cookies.get("refresh_token")
 

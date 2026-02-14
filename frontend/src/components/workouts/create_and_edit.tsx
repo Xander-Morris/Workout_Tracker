@@ -111,7 +111,7 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
                 (r) => r.name === selectedRoutineName,
             )!;
             setFormData({
-                name: selectedRoutine.name + " Copy",
+                name: selectedRoutine.name,
                 exercises: selectedRoutine.exercises,
                 comments: selectedRoutine.comments,
                 scheduled_date: selectedDate,
@@ -122,7 +122,7 @@ export const CreateAndEdit: React.FC<CreateAndEditProps> = ({
     }, [selectedRoutineName, routines, editType]);
 
     (useEffect(() => {
-        if (isCreating) return;
+        if (isCreating || editType != "workouts") return;
 
         setFormData(defaultFormData);
         setSelectedRoutineName("");

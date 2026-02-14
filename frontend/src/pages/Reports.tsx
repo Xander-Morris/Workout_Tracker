@@ -181,7 +181,6 @@ const Reports: FC = () => {
         let total: number = 0; // For the volume reports.
 
         for (const entry of inPeriod) {
-            console.log(entry);
             const key = entry.scheduled_date;
             perDay[key] = 0;
 

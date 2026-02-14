@@ -24,9 +24,9 @@ class UserSettings(BaseModel):
 
 class Exercise(BaseModel):
     name: str
-    sets: int = 0
-    reps: int = 0
-    weight: float = 0
+    sets: int = Field(..., ge=0)
+    reps: int = Field(..., ge=0)
+    weight: float = Field(..., ge=0)
 
 class NameRequired(BaseModel):
     name: str = Field(..., min_length=1, pattern=r"\S")
@@ -40,7 +40,7 @@ class ExercisesRequired(BaseModel):
     exercises: List[Exercise] = Field(..., min_length=1)
 
 class OptionalComments(BaseModel):
-    comments: Optional[str] = Field(..., min_length=0, max_length=250)
+    comments: Optional[str] = Field(None, max_length=250)
 
 class Workout(NameRequired, ScheduledDateRequired, ExercisesRequired, OptionalComments):
     pass
