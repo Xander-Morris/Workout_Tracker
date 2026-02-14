@@ -197,19 +197,21 @@ const Workouts: FC = () => {
                 </div>
 
                 {/* Create/Edit Form */}
-                <CreateAndEdit
-                    editType={"workouts"}
-                    defaultFormData={defaultFormData}
-                    isCreating={isCreating}
-                    setIsCreating={setIsCreating}
-                    setEditingId={setEditingId}
-                    editingId={editingId}
-                    formData={formData}
-                    setFormData={setFormData}
-                    selectedDate={DatesLibrary.getDateToLocaleDateTime(
-                        selectedDate,
-                    )}
-                />
+                {(isCreating || editingId) && (
+                    <CreateAndEdit
+                        editType={"workouts"}   
+                        defaultFormData={defaultFormData}
+                        isCreating={isCreating}
+                        setIsCreating={setIsCreating}
+                        setEditingId={setEditingId}
+                        editingId={editingId}
+                        formData={formData}
+                        setFormData={setFormData}
+                        selectedDate={DatesLibrary.getDateToLocaleDateTime(
+                            selectedDate,
+                        )}
+                    />
+                )}
 
                 <div className="mt-6 sm:mt-8">
                     <h2 className="text-lg sm:text-xl font-semibold text-white-600 mb-4">

@@ -42,16 +42,19 @@ const Routines: FC = () => {
         <>
             <div className="background-primary">
                 <Navbar />
-                <div className="w-full px-4 sm:px-6 lg:px-8 mx-auto pt-6 max-w-7xl">
-                    <div className="mb-8">
+                <div className="w-full px-4 sm:px-6 lg:px-8 mx-auto pt-4 max-w-7xl">
+                    <div className="mb-2"> 
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
                             <div>
                                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                                     My Routines
                                 </h1>
+                                <p className="text-sm sm:text-base text-gray-600 mt-1">
+                                    Total routines: {routines.length}
+                                </p>
                             </div>
 
-                            <div className="mt-16 flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
+                            <div className="mt-12 flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
                                 <BackButton className="flex items-center gap-2 bg-[#2A2A3D] text-white px-3 py-3 rounded-lg hover:bg-gray-600 transition-colors justify-center sm:justify-start" />
                                 <button
                                     onClick={() => {
@@ -69,18 +72,20 @@ const Routines: FC = () => {
                     </div>
 
                     {/* Create/Edit Form */}
-                    <CreateAndEdit
-                        editType={"routines"}
-                        isCreating={isCreating}
-                        setIsCreating={setIsCreating}
-                        setEditingId={setEditingId}
-                        editingId={editingId}
-                        formData={formData}
-                        setFormData={setFormData}
-                        defaultFormData={defaultFormData}
-                    />
+                    {(isCreating || editingId) && (
+                        <CreateAndEdit
+                            editType={"routines"}
+                            isCreating={isCreating}
+                            setIsCreating={setIsCreating}
+                            setEditingId={setEditingId}
+                            editingId={editingId}
+                            formData={formData}
+                            setFormData={setFormData}
+                            defaultFormData={defaultFormData}
+                        />
+                    )}
 
-                    <div className="mt-6 sm:mt-8">
+                    <div className="mt-2 sm:mt-4">
                         <div className="space-y-4">
                             <ul className="space-y-4">
                                 {routines.map((routine) => (
