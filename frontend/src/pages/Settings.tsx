@@ -2,6 +2,7 @@ import type { FC } from "react";
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "../lib/apiclient";
+import { useAuth } from "../contexts/auth";
 import { BackButton } from "../components/basic_buttons/back_button";
 import { Notifications } from "../lib/notifications";
 import { Card } from "../components/card";
@@ -9,6 +10,7 @@ import { Card } from "../components/card";
 const Settings: FC = () => {
     const queryClient = useQueryClient();
     const [bodyweightEnter, setBodyweightEnter] = useState("");
+    const { user, initialResetPasswordRequest } = useAuth();
 
     const {
         data: settings,
@@ -53,7 +55,7 @@ const Settings: FC = () => {
         },
     });
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleBodyweightSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         const weight = parseFloat(bodyweightEnter);
 
@@ -64,6 +66,11 @@ const Settings: FC = () => {
 
         updateBodyweightMutation(weight);
     };
+
+    const sendInitialResetPasswordRequest = () => {
+        const email = user?.email || "";
+        initialResetPasswordRequest(email);
+    }
 
     if (loadingSettings) {
         return (
@@ -85,7 +92,7 @@ const Settings: FC = () => {
         <Card className="background-primary flex items-center justify-center min-h-screen">
             <div className="max-w-md w-full">
                 <div className="card-background p-6">
-                    <div className="relative mb-6">
+                    <div className="relative mb-4">
                         <div className="absolute left-0 top-0">
                             <BackButton />
                         </div>
@@ -93,11 +100,17 @@ const Settings: FC = () => {
                             Settings
                         </h1>
                     </div>
-                    <p className="text-gray-300 text-center mb-8">
+                    <p className="text-gray-300 text-center mb-4">
                         Manage your profile information
                     </p>
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="flex items-center justify-center mb-4">
+                        <button onClick={sendInitialResetPasswordRequest} className="px-6 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-500/50 text-white font-semibold rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
+                            Send Reset Password Email
+                        </button>
+                    </div>
+
+                    <form onSubmit={handleBodyweightSubmit} className="space-y-6">
                         <div className="bg-slate-800/50 border border-white/10 rounded-lg p-4 mb-6">
                             <p className="text-gray-400 text-sm mb-1">
                                 Current Bodyweight
