@@ -30,7 +30,7 @@ export const BackButton: FC<BackButtonProps> = ({
         >
             {children ?? (
                 <img
-                    className="rotate-90 w-4 h-4"
+                    className="rotate-90"
                     src="/navbar/arrow.png"
                     alt="Back"
                 />

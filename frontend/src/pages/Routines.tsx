@@ -55,7 +55,7 @@ const Routines: FC = () => {
                             </div>
 
                             <div className="mt-12 flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
-                                <BackButton className="flex items-center gap-2 bg-[#2A2A3D] text-white px-3 py-3 rounded-lg hover:bg-gray-600 transition-colors justify-center sm:justify-start" />
+                                <BackButton className="w-10 h-10 flex items-center gap-2 bg-[#2A2A3D] text-white px-3 py-3 rounded-lg hover:bg-gray-600 transition-colors justify-center sm:justify-start" />
                                 <button
                                     onClick={() => {
                                         setFormData(defaultFormData);
